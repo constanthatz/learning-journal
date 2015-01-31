@@ -94,12 +94,6 @@ footer {
   color: #ccc;
 }
 
-.social-icon {
-  width: 20px;
-  height: 20px;
-  margin: 0 5px;
-}
- 
 
 
 /*********************************
@@ -124,13 +118,6 @@ PAGE: HOME
 /*********************************
 PAGE: DETAIL
 **********************************/
-
-.profile-photo {
-  display: block;
-  max-width: 150px;
-  margin: 0 auto 30px;
-  border-radius: 100%;
-}
 
 #date_title {
   margin: 20px 0 0 0;
