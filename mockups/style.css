@@ -132,6 +132,10 @@ PAGE: DETAIL
   border-radius: 100%;
 }
 
+#date_title {
+  margin: 20px 0 0 0;
+}
+
 
 
 /*********************************
@@ -170,6 +174,8 @@ input:focus, textarea:focus {
 }
 
 button {
+    background-color: #6ab47b;
+    padding: 1%;
     border-radius: 1em;
     border: 0px #CCC;
 }
@@ -179,33 +185,6 @@ button {
   text-align: center;
 }
 
-.contact-info {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 0.9em;
-}
-
-.contact-info a {
-  display: block;
-  min-height: 20px;
-  background-repeat: no-repeat;
-  background-size: 20px 20px;
-  padding: 0 0 0 30px;
-  margin: 0 0 10px;
-}
-
-.contact-info li.phone a {
-  background-image: url('../img/phone.png');
-}
-
-.contact-info li.mail a {
-  background-image: url('../img/mail.png');
-}
-
-.contact-info li.twitter a {
-  background-image: url('../img/twitter.png');
-}
 
 
 /*********************************
