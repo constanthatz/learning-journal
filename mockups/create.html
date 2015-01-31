@@ -1,39 +1,47 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Constantine Hatzis | Designer</title>
-    <link rel="stylesheet" href="normalize.css">
-    <link href='http://fonts.googleapis.com/css?family=Changa+One|Open+Sans:400italic,700italic,400,700,800' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="responsive.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  </head>
-  <body>
-    <header>
-      <a href="index.html" id="logo">
-        <h1>Constantine Hatzis</h1>
-        <h2>Designer  </h2>
-      </a>
-      <nav>
-        <ul>
-          <li><a href="index.html">Portfolio</a></li>
-          <li><a href="create.html" class="selected">Create</a></li>
-        </ul>
-      </nav>
-    </header>
-    <div id="wrapper">
-      <section>
-        <img src="img/thedoctor.jpg" alt="Photograph of The Doctor" class="profile-photo">
-        <h3>About</h3>
-        <p>Hi, I'm The Doctor! This is my design portfolio. When I am not designing I like to travel time and space looking for adventure.</p>
-        <p>If you'd like to follow my adventures go to the <a href="http://www.bbc.co.uk/programmes/b006q2x0">BBC</a>.</p>
-      </section>
-      <footer>
-        <a href="http://twitter.com"><img src="img/twitter-wrap.png" alt="Twitter Logo" class="social-icon"></a>
-        <a href="http://facebook.com"><img src="img/facebook-wrap.png" alt="Facebook Logo" class="social-icon"></a>
-        <p>&copy; 2015 Constantine Hatzis.</p>
-      </footer>
-    </div>
-  </body>
+    <head>
+        <meta charset="utf-8">
+        <title>Constantine Hatzis' Learning Journal</title>
+        <link rel="stylesheet" href="normalize.css">
+        <link href='http://fonts.googleapis.com/css?family=Changa+One|Open+Sans:400italic,700italic,400,700,800' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="responsive.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <header>
+            <a href="index.html" id="logo">
+                <h1>Constantine Hatzis</h1>
+                <h2>Code Fellows Python Development Accelerator Learning Journal</h2>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="create.html" class="selected">Create</a></li>
+                </ul>
+            </nav>
+        </header>
+        <div id="wrapper">
+            <section>
+                <h3 id="new_entry">New Entry</h3>
+                <form action="/somewhere" method="get">
+                    <div>
+                        <label for="journal_title">Title:</label>
+                        <input type="text" id="journal_title" />
+                    </div>
+                    <div>
+                        <label for="journal_text">Text:</label>
+                        <textarea id="journal_text"></textarea>
+                    </div>
+                    <div class="button">
+                        <button type="submit">Submit Entry</button>
+                    </div>
+                </form>
+            </section>
+            <footer>
+                <p>&copy; 2015 Constantine Hatzis.</p>
+            </footer>
+        </div>
+    </body>
 </html>
