@@ -38,7 +38,7 @@ def init_db():
     """
     settings = {}
     settings['db'] = os.environ.get(
-        'DATABASE_URL', 'dbname=learning_journal user=cewing'
+        'DATABASE_URL', 'dbname=learning_journal user=chatzis'
     )
     with closing(connect_db(settings)) as db:
         db.cursor().execute(DB_SCHEMA)
