@@ -7,6 +7,7 @@ from pyramid.view import view_config
 from waitress import serve
 import psycopg2
 from contextlib import closing
+from pyramid.events import NewRequest, subscriber
 
 DB_SCHEMA = """
 CREATE TABLE IF NOT EXISTS entries (
@@ -43,6 +44,13 @@ def init_db():
     with closing(connect_db(settings)) as db:
         db.cursor().execute(DB_SCHEMA)
         db.commit()
+
+
+@subscriber(NewRequest)
+def open_connection(event):
+    request = event.request
+    settings = request.registry.settings
+    request.db = connect_db(settings)
 
 
 def main():
