@@ -8,6 +8,7 @@ from waitress import serve
 import psycopg2
 from contextlib import closing
 from pyramid.events import NewRequest, subscriber
+import transaction
 
 DB_SCHEMA = """
 CREATE TABLE IF NOT EXISTS entries (
@@ -51,6 +52,20 @@ def open_connection(event):
     request = event.request
     settings = request.registry.settings
     request.db = connect_db(settings)
+
+def close_connection(request):
+    """close the database connection for this request
+
+    If there has been an error in the processing of the request, abort any
+    open transactions.
+    """
+    db = getattr(request, 'db', None)
+    if db is not None:
+        if request.exception is not None:
+            db.rollback()
+        else:
+            db.commit()
+        request.db.close()
 
 
 def main():
