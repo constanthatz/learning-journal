@@ -11,6 +11,7 @@ from cryptacular.bcrypt import BCRYPTPasswordManager
 
 
 TEST_DSN = 'dbname=test_learning_journal user=chatzis'
+SUBMIT_BTN = '<input type="submit" value="Share" name="Share"/>'
 
 
 def init_db(settings):
@@ -214,3 +215,30 @@ def test_do_login_missing_params(auth_req):
         auth_req.params = params
         with pytest.raises(ValueError):
             do_login(auth_req)
+
+
+def login_helper(username, password, app):
+    """encapsulate app login for reuse in tests
+
+    Accept all status codes so that we can make assertions in tests
+    """
+    login_data = {'username': username, 'password': password}
+    return app.post('/login', params=login_data, status_code='*')
+
+
+def test_start_as_anonymous(db):
+    client = app.test_client()
+    anon_home = client.get('/').data
+    assert SUBMIT_BTN not in anon_home
+
+
+def test_login_success(db):
+    username, password = ('admin', 'admin')
+    response = login_helper(username, password)
+    assert SUBMIT_BTN in response.data
+
+
+def test_login_fails(db):
+    username, password = ('admin', 'wrong')
+    response = login_helper(username, password)
+    assert 'Login Failed' in response.data
