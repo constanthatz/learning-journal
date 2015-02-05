@@ -6,6 +6,7 @@ from journal import connect_db
 from journal import DB_SCHEMA
 import datetime
 from journal import INSERT_ENTRY
+import os
 
 
 TEST_DSN = 'dbname=test_learning_journal user=chatzis'
@@ -114,6 +115,7 @@ def test_read_entries(req_context):
         for key in 'id', 'created':
             assert key in entry
 
+
 @pytest.fixture(scope='function')
 def app(db):
     from journal import main
@@ -121,3 +123,11 @@ def app(db):
     os.environ['DATABASE_URL'] = TEST_DSN
     app = main()
     return TestApp(app)
+
+
+def test_empty_listing(app):
+    response = app.get('/')
+    assert response.status_code == 200
+    actual = response.body
+    expected = 'No entries here so far'
+    assert expected in actual
