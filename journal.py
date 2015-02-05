@@ -119,7 +119,6 @@ def read_entries(request):
     cursor.execute(READ_ENTRIES)
     results = cursor.fetchall()
     keys = ('if', 'title', 'text', 'created')
-    entries = [dict(zip(keys, item)) for item in results]
     return {'entries': entries}
 
 
