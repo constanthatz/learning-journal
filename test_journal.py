@@ -36,3 +36,32 @@ def run_query(db, query, params=(), get_results=True):
     if get_results:
         results = cursor.fetchall()
     return results
+
+
+@pytest.fixture(scope='session')
+def db(request):
+    """set up and tear down a database"""
+    settings = {'db': TEST_DSN}
+    init_db(settings)
+
+    def cleanup():
+        clear_db(settings)
+
+    request.addfinalizer(cleanup)
+
+    return settings
+
+
+@pytest.yield_fixture(scope='function')
+def req_context(db, request):
+    """mock a request with a database attached"""
+    settings = db
+    req = testing.DummyRequest()
+    with closing(connect_db(settings)) as db:
+        req.db = db
+        req.exception = None
+        yield req
+
+        # after a test has run, we clear out entries for isolation
+        clear_entries(settings)
+
