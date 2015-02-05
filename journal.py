@@ -10,6 +10,9 @@ from contextlib import closing
 from pyramid.events import NewRequest, subscriber
 import datetime
 from pyramid.httpexceptions import HTTPFound, HTTPInternalServerError
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
+
 
 
 DB_SCHEMA = """
@@ -93,10 +96,17 @@ def main():
     # secret value for session signing:
     secret = os.environ.get('JOURNAL_SESSION_SECRET', 'itsaseekrit')
     session_factory = SignedCookieSessionFactory(secret)
+    # add a secret value for auth tkt signing
+    auth_secret = os.environ.get('JOURNAL_AUTH_SECRET', 'anotherseekrit')
     # configuration setup
     config = Configurator(
         settings=settings,
-        session_factory=session_factory
+        session_factory=session_factory,
+        authentication_policy=AuthTktAuthenticationPolicy(
+            secret=auth_secret,
+            hashalg='sha512'
+        ),
+        authorization_policy=ACLAuthorizationPolicy(),
     )
     config.include('pyramid_jinja2')
     config.add_route('home', '/')
