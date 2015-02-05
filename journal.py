@@ -8,7 +8,6 @@ from waitress import serve
 import psycopg2
 from contextlib import closing
 from pyramid.events import NewRequest, subscriber
-import transaction
 
 DB_SCHEMA = """
 CREATE TABLE IF NOT EXISTS entries (
