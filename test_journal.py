@@ -7,7 +7,7 @@ from journal import connect_db
 from journal import DB_SCHEMA
 
 
-TEST_DSN = 'dbname=test_learning_journal user=cewing'
+TEST_DSN = 'dbname=test_learning_journal user=chatzis'
 
 
 def init_db(settings):
