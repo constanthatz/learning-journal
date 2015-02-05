@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS entries (
 """
 
 NEW_ENTRY = """
-INSERT INTO entries (title, text) VALUES (%s, %s, %s)"""
+INSERT INTO entries (title, text, created) VALUES (%s, %s, %s)"""
 
 logging.basicConfig()
 log = logging.getLogger(__file__)
@@ -105,7 +105,6 @@ def write_entry(request):
     text = request.params.get('text')
     created = datetime.datetime.utcnow()
     request.db.cursor().execute(NEW_ENTRY, [title, text, created])
-
 
 
 if __name__ == '__main__':
