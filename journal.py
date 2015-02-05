@@ -88,6 +88,8 @@ def main():
     settings['db'] = os.environ.get(
         'DATABASE_URL', 'dbname=learning_journal user=chatzis'
     )
+    settings['auth.username'] = os.environ.get('AUTH_USERNAME', 'admin')
+    settings['auth.password'] = os.environ.get('AUTH_PASSWORD', 'secret')
     # secret value for session signing:
     secret = os.environ.get('JOURNAL_SESSION_SECRET', 'itsaseekrit')
     session_factory = SignedCookieSessionFactory(secret)
