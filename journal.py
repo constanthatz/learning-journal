@@ -8,6 +8,7 @@ from waitress import serve
 import psycopg2
 from contextlib import closing
 from pyramid.events import NewRequest, subscriber
+import datetime
 
 DB_SCHEMA = """
 CREATE TABLE IF NOT EXISTS entries (
@@ -17,6 +18,8 @@ CREATE TABLE IF NOT EXISTS entries (
     created TIMESTAMP NOT NULL
 )
 """
+
+INSERT INTO entries (title, text, created) VALUES (%s %s %s)
 
 logging.basicConfig()
 log = logging.getLogger(__file__)
@@ -93,6 +96,11 @@ def main():
     settings['db'] = os.environ.get(
         'DATABASE_URL', 'dbname=learning_journal user=chatzis'
     )
+
+
+def write_entry(request):
+    """Add an entry to the database"""
+
 
 
 if __name__ == '__main__':
