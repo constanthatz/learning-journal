@@ -223,7 +223,7 @@ def login_helper(username, password, app):
     Accept all status codes so that we can make assertions in tests
     """
     login_data = {'username': username, 'password': password}
-    return app.post('/login', params=login_data, status_code='*')
+    return app.post('/login', params=login_data, status='*')
 
 
 def test_start_as_anonymous(app):
@@ -249,3 +249,4 @@ def test_login_fails(app):
     actual = response.body
     assert "Login Failed" in actual
     assert INPUT_BTN not in actual
+
