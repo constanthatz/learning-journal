@@ -92,6 +92,7 @@ def main():
         settings=settings,
         session_factory=session_factory
     )
+    config.include('pyramid_jinja2')
     config.add_route('home', '/')
     config.scan()
     app = config.make_wsgi_app()
@@ -121,7 +122,6 @@ def read_entries(request):
     keys = ('id', 'title', 'text', 'created')
     entries = [dict(zip(keys, item)) for item in results]
     return {'entries': entries}
-
 
 
 if __name__ == '__main__':
