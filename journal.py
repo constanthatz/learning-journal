@@ -24,7 +24,7 @@ INSERT INTO entries (title, text, created) VALUES (%s, %s, %s)
 """
 
 READ_ENTRIES = """
-SELECT * FROM entries
+SELECT id, title, text, created FROM entries
 """
 
 
@@ -115,8 +115,10 @@ def write_entry(request):
 
 def read_entries(request):
     """Read entries in the database"""
-    request.db.cursor().execute(READ_ENTRIES)
-    results = request.db.cursor().fetchall()
+    cursor = request.db.cursor()
+    cursor.execute(READ_ENTRIES)
+    results = cursor.fetchall()
+
 
 
 if __name__ == '__main__':
