@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS entries (
 """
 
 NEW_ENTRY = """
-INSERT INTO entries (title, text) VALUES (%s %s)"""
+INSERT INTO entries (title, text) VALUES (%s, %s)"""
 
 logging.basicConfig()
 log = logging.getLogger(__file__)
