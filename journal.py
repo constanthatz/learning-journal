@@ -116,7 +116,8 @@ def write_entry(request):
 def read_entries(request):
     """Read entries in the database"""
     request.db.cursor().execute(READ_ENTRIES)
-    request.db.cursor.fetchall()
+
+    request.db.cursor().fetchall()
 
 
 if __name__ == '__main__':
