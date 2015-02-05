@@ -52,6 +52,8 @@ def open_connection(event):
     request = event.request
     settings = request.registry.settings
     request.db = connect_db(settings)
+    request.add_finished_callback(close_connection)
+
 
 def close_connection(request):
     """close the database connection for this request
