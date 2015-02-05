@@ -24,7 +24,7 @@ INSERT INTO entries (title, text, created) VALUES (%s, %s, %s)
 """
 
 READ_ENTRIES = """
-
+SELECT * FROM entries
 """
 
 
