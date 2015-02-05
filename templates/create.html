@@ -17,16 +17,27 @@
       </a>
       <nav>
         <ul>
-          <li><a href="index.html" class="selected">Home</a></li>
-          <li><a href="create.html">Create</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="create.html" class="selected">Create</a></li>
         </ul>
       </nav>
     </header>
     <div id="wrapper">
       <section>
-        <ul id="gallery">
-        {% block body %}{% endblock %}
-        </ul>
+        <h3 id="new_entry">New Entry</h3>
+        <form action="/somewhere" method="get">
+          <div>
+            <label for="journal_title">Title:</label>
+            <input type="text" id="journal_title" />
+          </div>
+          <div>
+            <label for="journal_text">Text:</label>
+            <textarea id="journal_text"></textarea>
+          </div>
+          <div class="button">
+            <button type="submit">Submit Entry</button>
+          </div>
+        </form>
       </section>
       <footer>
         <p>&copy; 2015 Constantine Hatzis.</p>
@@ -34,5 +45,3 @@
     </div>
   </body>
 </html>
-
-
