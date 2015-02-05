@@ -11,7 +11,7 @@ from cryptacular.bcrypt import BCRYPTPasswordManager
 
 
 TEST_DSN = 'dbname=test_learning_journal user=chatzis'
-SUBMIT_BTN = '<input type="submit" value="Share" name="Share"/>'
+INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
 
 
 def init_db(settings):
@@ -226,19 +226,26 @@ def login_helper(username, password, app):
     return app.post('/login', params=login_data, status_code='*')
 
 
-def test_start_as_anonymous(db):
-    client = app.test_client()
-    anon_home = client.get('/').data
-    assert SUBMIT_BTN not in anon_home
+def test_start_as_anonymous(app):
+    response = app.get('/', status=200)
+    actual = response.body
+    assert INPUT_BTN not in actual
 
 
-def test_login_success(db):
-    username, password = ('admin', 'admin')
-    response = login_helper(username, password)
-    assert SUBMIT_BTN in response.data
+def test_login_success(app):
+    username, password = ('admin', 'secret')
+    redirect = login_helper(username, password, app)
+    assert redirect.status_code == 302
+    response = redirect.follow()
+    assert response.status_code == 200
+    actual = response.body
+    assert INPUT_BTN in actual
 
 
-def test_login_fails(db):
+def test_login_fails(app):
     username, password = ('admin', 'wrong')
-    response = login_helper(username, password)
-    assert 'Login Failed' in response.data
+    response = login_helper(username, password, app)
+    assert response.status_code == 200
+    actual = response.body
+    assert "Login Failed" in actual
+    assert INPUT_BTN not in actual
