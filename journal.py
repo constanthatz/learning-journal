@@ -113,7 +113,8 @@ def main():
     )
     config.include('pyramid_jinja2')
     config.add_route('home', '/')
-    config.add_route('add', '/add') 
+    config.add_route('add', '/add')
+    config.add_route('login', '/login')
     config.scan()
     app = config.make_wsgi_app()
     return app
