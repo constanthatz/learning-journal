@@ -107,6 +107,14 @@ def write_entry(request):
     request.db.cursor().execute(INSERT_ENTRY, [title, text, created])
 
 
+def read_entries(request):
+    """Read entries in the database"""
+    title = request.params.get('title')
+    text = request.params.get('text')
+    created = datetime.datetime.utcnow()
+    request.db.cursor().execute(INSERT_ENTRY, [title, text, created])
+
+
 if __name__ == '__main__':
     app = main()
     port = os.environ.get('PORT', 5000)
