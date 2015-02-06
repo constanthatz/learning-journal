@@ -15,6 +15,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from pyramid.security import remember, forget
 
+here = os.path.dirname(os.path.abspath(__file__))
 
 DB_SCHEMA = """
 CREATE TABLE IF NOT EXISTS entries (
@@ -112,6 +113,7 @@ def main():
         authorization_policy=ACLAuthorizationPolicy(),
     )
     config.include('pyramid_jinja2')
+    config.add_static_view('static', os.path.join(here, 'static'))
     config.add_route('home', '/')
     config.add_route('add', '/add')
     config.add_route('login', '/login')
