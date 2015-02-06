@@ -14,14 +14,22 @@
   </head>
   <body>
     <header>
-      <a href="index.html" id="logo">
+      <a href="/" id="logo">
         <h1>CH</h1>
         <h2>Code Fellows Python Development Accelerator Learning Journal</h2>
       </a>
+      <aside id="user-controls">
+          <ul>
+          {% if not request.authenticated_userid %}
+            <li><a href="{{ request.route_url('login') }}">log in</a></li>
+          {% else %}
+            <li><a href="{{ request.route_url('logout') }}">log out</a></li>
+          {% endif %}
+          </ul>
+        </aside>
       <nav>
         <ul>
-          <li><a href="index.html" class="selected">Home</a></li>
-          <li><a href="create.html">Create</a></li>
+          <li><a href="/" class="selected">Home</a></li>
         </ul>
       </nav>
     </header>
