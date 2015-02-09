@@ -6,33 +6,40 @@
     <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <link href="/static/normalize.css" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Changa+One|Open+Sans:400italic,700italic,400,700,800' rel='stylesheet' type='text/css'>
     <link href="/static/style.css" rel="stylesheet" type="text/css">
+    <link href="/static/responsive.css" rel="stylesheet" type="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
     <header>
-    <aside id="user-controls">
+      <a href="/" id="logo">
+        <h1>Constantine Hatzis</h1>
+        <h2>Code Fellows Python Development Accelerator Learning Journal</h2>
+      </a>
+      <nav>
+        <aside id="user-controls">
           <ul>
           {% if not request.authenticated_userid %}
-            <li><a href="{{ request.route_url('login') }}">log in</a></li>
+            <li><a href="{{ request.route_url('login') }}">Log In</a></li>
           {% else %}
-            <li><a href="{{ request.route_url('logout') }}">log out</a></li>
+            <li><a href="{{ request.route_url('logout') }}">Log Out</a></li>
           {% endif %}
           </ul>
         </aside>
-      <nav>
-        <ul>
-          <li><a href="/">Home</a></li>
-        </ul>
       </nav>
     </header>
-    <main>
-      <h1>My Python Journal</h1>
-      <section id="content">
-      {% block body %}{% endblock %}
-      </section>
-    </main>
-    <footer>
-      <p>Created in the Code Fellows Python Dev Accelerator</p>
-    </footer>
+    <div id ="wrapper"
+      <main>
+        <h1>My Python Journal</h1>
+        <section id="content">
+        {% block body %}{% endblock %}
+        </section>
+      </main>
+      <footer>
+        <p>Created in the Code Fellows Python Dev Accelerator</p>
+      </footer>
+    </div>
   </body>
 </html>
