@@ -1,54 +1,217 @@
-body{
-    color:#111;
-    padding:0;
-    margin:0}
-header{
-    margin:0;
-    padding:0 0.75em;
-    width:100%;}
-header:after{
-    content:"";
-    display:table;
-    clear:both;}
-header a{
-    text-decoration:none}
-header aside{
-    float:right;
-    text-align:right;
-    padding-right:0.75em}
-header ul{
-    list-style:none;
-    list-style-type:none;
-    display:inline-block}
-header ul li{
-    margin:0 0.25em 0 0}
-header ul li a{
-    padding:0;
-    display:inline-block}
-main{padding:0 0.75em 1em}
-main:after{
-    content:"";
-    display:table;
-    clear:both}
-main article{
-    margin-bottom:1em;
-    padding-left:0.5em}
-main article h3{margin-top:0}
-main article .entry_body{
-    margin:0.5em}
-main aside{float:right}
-main aside .field{
-    margin-bottom:1em}
-main aside .field input,
-main aside .field label,
-main aside .field textarea{
-    vertical-align:top}
-main aside .field label{
-    display:inline-block;
-    width:15%;
-    padding-top:2px}
-main aside .field input,
-main aside .field textarea{
-    width:83%}
-main aside .control_row input{
-    margin-left:16%}
+/*********************************
+GENERAL
+**********************************/
+
+body {
+  font-family: 'Open Sans', sans-serif;
+}
+
+#wrapper {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+a {
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%
+}
+
+h3 {
+  margin: 0 0 1em 0;
+}
+
+/*********************************
+HEADING
+**********************************/
+
+header {
+  float: left;
+  margin: 0 0 30px 0;
+  padding: 5px 0 0 0;
+  width: 100%;
+}
+
+#logo {
+  text-align: center;
+  margin: 0;
+}
+
+h1 {
+  font-family: 'Changa One', sans-serif;
+  margin: 15px 0;
+  font-size: 1.75em;
+  font-weight: normal;
+  line-height: 0.8em;
+}
+
+h2 {
+  font-size: 0.75em;
+  margin: -5px 0 0;
+  font-weight: normal;
+}
+
+
+
+/*********************************
+NAVIGATION
+**********************************/
+
+nav {
+  text-align: center;
+  padding: 10px 0;
+  margin: 20px 0 0;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0 10px;
+  padding: 0;
+}  
+
+nav li {
+  display: inline-block;
+}
+
+nav a {
+  font-weight: 800;
+  padding: 15px 10px;
+}
+
+
+/*********************************
+FOOTER
+**********************************/
+
+footer {
+  font-size: 0.75em;
+  text-align: center;
+  clear: both;
+  padding-top: 50px;
+  color: #ccc;
+}
+
+
+
+/*********************************
+PAGE: HOME
+**********************************/
+
+#gallery {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#gallery li a p {
+  margin: 0;
+  padding: 5%;
+  font-size: 0.75em;
+  color: #bdc3c7
+}
+
+
+
+/*********************************
+PAGE: DETAIL
+**********************************/
+
+#date_title {
+  margin: 20px 0 0 0;
+}
+
+
+
+/*********************************
+PAGE: CREATE
+**********************************/
+
+form {
+    width: 100%;
+    padding: 5%;
+    border: 2px solid #CCC;
+    border-radius: 1em;
+    box-sizing: border-box;
+}
+
+form div + div {
+    margin-top: 1em;
+}
+
+label {
+    display: block;
+    width: 5%;
+}
+
+textarea {
+    height: 200px;
+}
+
+input, textarea {
+    width: 100%;
+    border: 2px solid #999;
+    box-sizing: border-box;
+}
+
+input:focus, textarea:focus {
+    border-color: #000;
+}
+
+button {
+    background-color: #6ab47b;
+    padding: 1%;
+    border-radius: 1em;
+    border: 0px #CCC;
+}
+
+#new_entry {
+  margin: 10px auto;
+  text-align: center;
+}
+
+
+
+/*********************************
+COLORS
+**********************************/
+
+/* site body*/
+body {
+  background-color: #fff;
+  color: #999;
+}
+
+/* green header */
+header {
+  background: #6ab47b;
+  border-color: #599a68
+}
+
+/* nav background on mobile */
+nav {
+  background: #599a68;
+}
+
+/* logo text */
+h1, h2 {
+  color: #fff
+}
+
+/* links */
+a {
+  color: #6ab47b;
+}
+
+/* nav link */
+nav a, nav a:visited {
+  color: #fff;
+}
+
+/* selected nav link */
+nav a.selected, nav a:hover {
+  color: #32673f
+}
+
