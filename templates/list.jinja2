@@ -24,6 +24,7 @@
     <div class="entry_body">
       {{ entry.text|safe }}
     </div>
+    <a href= "{{ request.route_url('detail', id=entry.id) }}">LINK</a>
   </article>
   {% else %}
   <div class="entry">
