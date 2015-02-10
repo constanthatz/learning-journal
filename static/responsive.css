@@ -47,6 +47,7 @@
   **********************************/
   
   nav {
+    text-align: right;
     background: none;
     float: right;
     font-size: 1.125em;
