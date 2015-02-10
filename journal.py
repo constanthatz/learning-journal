@@ -26,11 +26,12 @@ CREATE TABLE IF NOT EXISTS entries (
 )
 """
 
-INSERT_ENTRY = """
-INSERT INTO entries (title, text, created) VALUES (%s, %s, %s)
+INSERT_ENTRY = """INSERT INTO entries (title, text, created) VALUES (%s, %s, %s)
 """
-DB_ENTRIES_LIST = """
-SELECT id, title, text, created FROM entries ORDER BY created DESC
+DB_ENTRIES_LIST = """SELECT id, title, text, created FROM entries ORDER BY created DESC
+"""
+
+DB_ENTRY = """SELECT * FROM entries WHERE id=%s
 """
 
 
@@ -50,7 +51,7 @@ def init_db():
     """
     settings = {}
     settings['db'] = os.environ.get(
-        'DATABASE_URL', 'dbname=learning_journal user=henryhowes'
+        'DATABASE_URL', 'dbname=learning_journal user=chatzis'
     )
     with closing(connect_db(settings)) as db:
         db.cursor().execute(DB_SCHEMA)
@@ -86,7 +87,7 @@ def main():
     settings['reload_all'] = os.environ.get('DEBUG', True)
     settings['debug_all'] = os.environ.get('DEBUG', True)
     settings['db'] = os.environ.get(
-        'DATABASE_URL', 'dbname=learning_journal user=henryhowes'
+        'DATABASE_URL', 'dbname=learning_journal user=chatzis'
     )
     settings['auth.username'] = os.environ.get('AUTH_USERNAME', 'admin')
     manager = BCRYPTPasswordManager()
@@ -140,7 +141,7 @@ def read_entries(request):
 def read_entry(request):
     """return a list of all entries as dicts"""
     cursor = request.db.cursor()
-    cursor.execute(DB_ENTRIES_LIST)
+    cursor.execute(DB_ENTRY, (request.matchdict['id'], ))
     keys = ('id', 'title', 'text', 'created')
     entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
     return {'entries': entries}
