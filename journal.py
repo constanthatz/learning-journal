@@ -118,6 +118,7 @@ def main():
     config.add_route('add', '/add')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    config.add_route('detail', '/detail')
     config.scan()
     app = config.make_wsgi_app()
     return app
