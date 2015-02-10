@@ -137,6 +137,7 @@ def read_entries(request):
     entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
     return {'entries': entries}
 
+
 @view_config(route_name='detail', renderer='templates/detail.jinja2')
 def read_entry(request):
     """return a list of all entries as dicts"""
@@ -145,6 +146,7 @@ def read_entry(request):
     keys = ('id', 'title', 'text', 'created')
     entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
     return {'entries': entries}
+
 
 @view_config(route_name='add', request_method='POST')
 def add_entry(request):
@@ -198,14 +200,4 @@ if __name__ == '__main__':
     app = main()
     port = os.environ.get('PORT', 5000)
     serve(app, host='0.0.0.0', port=port)
-
-
-# @view_config(route_name='detail', renderer='templates/detail.jinja2')
-# def read_entry(request):
-#     """return a list of all entries as dicts"""
-#     return {'test': 'test'}
-#     # cursor = request.db.cursor()
-#     # cursor.execute(DB_ENTRIES_LIST)
-#     # keys = ('id', 'title', 'text', 'created')
-#     # entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
-#     # return {'entries': entries}
+    
