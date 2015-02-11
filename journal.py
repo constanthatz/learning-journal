@@ -14,6 +14,7 @@ from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from pyramid.security import remember, forget
+import markdown
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -127,6 +128,7 @@ def write_entry(request):
     """write a single entry to the database"""
     title = request.params.get('title', None)
     text = request.params.get('text', None)
+    text = markdown.markdown(text)
     created = datetime.datetime.utcnow()
     request.db.cursor().execute(INSERT_ENTRY, [title, text, created])
 
