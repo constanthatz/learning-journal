@@ -15,6 +15,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from pyramid.security import remember, forget
 import markdown
+import pygments
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -128,7 +129,6 @@ def write_entry(request):
     """write a single entry to the database"""
     title = request.params.get('title', None)
     text = request.params.get('text', None)
-    text = markdown.markdown(text)
     created = datetime.datetime.utcnow()
     request.db.cursor().execute(INSERT_ENTRY, [title, text, created])
 
@@ -150,6 +150,9 @@ def read_entries(request):
     cursor.execute(DB_ENTRIES_LIST)
     keys = ('id', 'title', 'text', 'created')
     entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
+    for item in entries:
+        item['text'] = markdown.markdown(item['text'], extensions=['codehilite'])
+        print(item['text'])
     return {'entries': entries}
 
 
