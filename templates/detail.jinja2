@@ -7,7 +7,9 @@
     <div class="entry_body">
       {{ entry.text|safe }}
     </div>
-    <a href= "{{ request.route_url('editview', id=entry.id) }}">Edit</a>
+    {% if request.authenticated_userid %}
+      <a href= "{{ request.route_url('editview', id=entry.id) }}">Edit</a>
+    {% endif %}
   </article>
   {% else %}
   <div class="entry">
