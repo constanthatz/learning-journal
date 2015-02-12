@@ -73,12 +73,71 @@ def req_context(db, request):
 
 
 @pytest.fixture(scope='function')
-def app(db):
+def app(db, request):
     from journal import main
     from webtest import TestApp
     os.environ['DATABASE_URL'] = TEST_DSN
     app = main()
+
+    def cleanup():
+        settings = {'db': TEST_DSN}
+        clear_entries(settings)
+
+    request.addfinalizer(cleanup)
+
     return TestApp(app)
+
+
+@pytest.fixture(scope='function')
+def entry(db, request):
+    """provide a single entry in the database"""
+    settings = db
+    now = datetime.datetime.utcnow()
+    expected = ('Test Title', 'Test Text', now)
+    with closing(connect_db(settings)) as db:
+        run_query(db, INSERT_ENTRY, expected, False)
+        db.commit()
+
+    def cleanup():
+        clear_entries(settings)
+
+    request.addfinalizer(cleanup)
+
+    return expected
+
+
+@pytest.fixture(scope='function')
+def auth_req(request):
+    manager = BCRYPTPasswordManager()
+    settings = {
+        'auth.username': 'admin',
+        'auth.password': manager.encode('secret'),
+    }
+    testing.setUp(settings=settings)
+    req = testing.DummyRequest()
+
+    def cleanup():
+        testing.tearDown()
+
+    request.addfinalizer(cleanup)
+
+    return req
+
+
+def test_empty_listing(app):
+    response = app.get('/')
+    assert response.status_code == 200
+    actual = response.body
+    expected = 'No entries here so far'
+    assert expected in actual
+
+
+def test_listing(app, entry):
+    response = app.get('/')
+    assert response.status_code == 200
+    actual = response.body
+    for expected in entry[:2]:
+        assert expected in actual
 
 
 def test_read_entries_empty(req_context):
@@ -114,8 +173,6 @@ def test_read_entry(req_context):
     expected = ('Test Title', 'Test Text', now)
     run_query(req_context.db, INSERT_ENTRY, expected, False)
     item = run_query(req_context.db, READ_ENTRY)
-    # assert item == {'id': 1}
-    # call the function under test
     req_context.matchdict = {'id': item[0][0]}
     from journal import read_entry
     result = read_entry(req_context)
@@ -137,10 +194,10 @@ def test_write_entry(req_context):
     req_context.params = dict(zip(fields, expected))
 
     # assert that there are no entries when we start
-    rows = run_query(req_context.db, "SELECT * FROM entries")
+    rows = run_query(req_context.db, READ_ENTRY)
     assert len(rows) == 0
 
-    result = write_entry(req_context)
+    write_entry(req_context)
     # manually commit so we can see the entry on query
     req_context.db.commit()
 
@@ -151,38 +208,32 @@ def test_write_entry(req_context):
         assert val == actual[idx]
 
 
-def test_empty_listing(app):
-    response = app.get('/')
-    assert response.status_code == 200
-    actual = response.body
-    expected = 'No entries here so far'
-    assert expected in actual
+def test_edit_entry(req_context):
+    from journal import edit_entry
+    from journal import write_entry
 
+    fields = ('title', 'text')
+    original = ('Test Title', 'Test Text')
+    req_context.params = dict(zip(fields, original))
+    write_entry(req_context)
+    req_context.db.commit()
 
-@pytest.fixture(scope='function')
-def entry(db, request):
-    """provide a single entry in the database"""
-    settings = db
-    now = datetime.datetime.utcnow()
-    expected = ('Test Title', 'Test Text', now)
-    with closing(connect_db(settings)) as db:
-        run_query(db, INSERT_ENTRY, expected, False)
-        db.commit()
+    rows = run_query(req_context.db, READ_ENTRY)
+    assert len(rows) == 1
 
-    def cleanup():
-        clear_entries(settings)
+    req_context.matchdict = {'id': rows[0][0]}
 
-    request.addfinalizer(cleanup)
+    expected = ('New Title', 'New Text')
+    req_context.params = dict(zip(fields, expected))
+    edit_entry(req_context)
+    req_context.db.commit()
 
-    return expected
+    rows = run_query(req_context.db, "SELECT title, text FROM entries")
+    assert len(rows) == 1
 
-
-def test_listing(app, entry):
-    response = app.get('/')
-    assert response.status_code == 200
-    actual = response.body
-    for expected in entry[:2]:
-        assert expected in actual
+    actual = rows[0]
+    for idx, val in enumerate(expected):
+        assert val == actual[idx]
 
 
 def test_post_to_add_view(app):
@@ -190,31 +241,51 @@ def test_post_to_add_view(app):
         'title': 'Hello there',
         'text': 'This is a post',
     }
-    login_helper('admin', 'secret', app)
+    username, password = ('admin', 'secret')
+    login_helper(username, password, app)
     response = app.post('/add', params=entry_data, status='3*')
     redirected = response.follow()
     actual = redirected.body
-    print(actual)
     for expected in entry_data.values():
         assert expected in actual
 
 
-@pytest.fixture(scope='function')
-def auth_req(request):
-    manager = BCRYPTPasswordManager()
-    settings = {
-        'auth.username': 'admin',
-        'auth.password': manager.encode('secret'),
+def test_post_to_add_view_unauthorized(app):
+    entry_data = {
+        'title': 'Hello there',
+        'text': 'This is a post',
     }
-    testing.setUp(settings=settings)
-    req = testing.DummyRequest()
+    response = app.post('/add', params=entry_data, status='3*')
+    redirected = response.follow()
+    actual = redirected.body
+    for expected in entry_data.values():
+            assert expected not in actual
 
-    def cleanup():
-        testing.tearDown()
 
-    request.addfinalizer(cleanup)
+def test_post_to_edit_view(app):
+    entry_data = {
+        'title': 'Hello there',
+        'text': 'This is a post',
+    }
+    username, password = ('admin', 'secret')
+    login_helper(username, password, app)
+    response = app.post('/add', params=entry_data, status='3*')
+    redirected = response.follow()
+    actual = redirected.body
+    for expected in entry_data.values():
+        assert expected in actual
 
-    return req
+
+def test_post_to_edit_view_unauthorized(app):
+    entry_data = {
+        'title': 'Hello there',
+        'text': 'This is a post',
+    }
+    response = app.post('/add', params=entry_data, status='3*')
+    redirected = response.follow()
+    actual = redirected.body
+    for expected in entry_data.values():
+            assert expected not in actual
 
 
 def test_do_login_success(auth_req):
