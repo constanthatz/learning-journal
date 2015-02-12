@@ -152,7 +152,8 @@ def read_entries(request):
     entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
     # import pdb; pdb.set_trace()
     for item in entries:
-        item['text'] = markdown.markdown(item['text'], extensions=['codehilite', 'fenced_code'])
+        item['text'] = markdown.markdown(
+            item['text'], extensions=['codehilite', 'fenced_code'])
     return {'entries': entries}
 
 
@@ -164,7 +165,8 @@ def read_entry(request):
     keys = ('id', 'title', 'text', 'created')
     entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
     for item in entries:
-        item['text'] = markdown.markdown(item['text'], extensions=['codehilite', 'fenced_code'])
+        item['text'] = markdown.markdown(
+            item['text'], extensions=['codehilite', 'fenced_code'])
     return {'entries': entries}
 
 
