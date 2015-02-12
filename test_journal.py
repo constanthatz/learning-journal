@@ -220,6 +220,9 @@ def test_edit_entry(req_context):
 
     rows = run_query(req_context.db, READ_ENTRY)
     assert len(rows) == 1
+    actual = rows[0][1:3]
+    for idx, val in enumerate(original):
+        assert val == actual[idx]
 
     req_context.matchdict = {'id': rows[0][0]}
 
