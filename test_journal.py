@@ -12,6 +12,8 @@ from cryptacular.bcrypt import BCRYPTPasswordManager
 
 TEST_DSN = 'dbname=test_learning_journal user=chatzis'
 INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
+READ_ENTRY = """SELECT * FROM entries
+"""
 
 
 def init_db(settings):
@@ -123,15 +125,19 @@ def test_read_entry(req_context):
     now = datetime.datetime.utcnow()
     expected = ('Test Title', 'Test Text', now)
     run_query(req_context.db, INSERT_ENTRY, expected, False)
+    item = run_query(req_context.db, READ_ENTRY)
+    # assert item == {'id': 1}
     # call the function under test
+    req_context.matchdict = {'id': item[0][0]}
     from journal import read_entry
     result = read_entry(req_context)
     # make assertions about the result
+    
     assert 'entries' in result
     assert len(result['entries']) == 1
     for entry in result['entries']:
         assert expected[0] == entry['title']
-        assert expected[1] == entry['text']
+        assert '<p>{}</p>'.format(expected[1]) == entry['text']
         for key in 'id', 'created':
             assert key in entry
 
@@ -184,9 +190,11 @@ def test_post_to_add_view(app):
         'title': 'Hello there',
         'text': 'This is a post',
     }
+    login_helper('admin', 'secret', app)
     response = app.post('/add', params=entry_data, status='3*')
     redirected = response.follow()
     actual = redirected.body
+    print(actual)
     for expected in entry_data.values():
         assert expected in actual
 
