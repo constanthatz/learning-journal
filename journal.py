@@ -158,7 +158,7 @@ def read_entries(request):
 
 @view_config(route_name='detail', renderer='templates/detail.jinja2')
 def read_entry(request):
-    """return a list of all entries as dicts"""
+    """return a list of one entry as a dict"""
     cursor = request.db.cursor()
     cursor.execute(DB_ENTRY, (request.matchdict['id'], ))
     keys = ('id', 'title', 'text', 'created')
