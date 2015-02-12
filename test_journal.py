@@ -113,6 +113,24 @@ def test_read_entries(req_context):
     assert len(result['entries']) == 1
     for entry in result['entries']:
         assert expected[0] == entry['title']
+        assert '<p>{}</p>'.format(expected[1]) == entry['text']
+        for key in 'id', 'created':
+            assert key in entry
+
+
+def test_read_entry(req_context):
+    # prepare data for testing
+    now = datetime.datetime.utcnow()
+    expected = ('Test Title', 'Test Text', now)
+    run_query(req_context.db, INSERT_ENTRY, expected, False)
+    # call the function under test
+    from journal import read_entry
+    result = read_entry(req_context)
+    # make assertions about the result
+    assert 'entries' in result
+    assert len(result['entries']) == 1
+    for entry in result['entries']:
+        assert expected[0] == entry['title']
         assert expected[1] == entry['text']
         for key in 'id', 'created':
             assert key in entry
