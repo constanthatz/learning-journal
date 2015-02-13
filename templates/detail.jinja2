@@ -15,9 +15,5 @@
       <a href= "{{ request.route_url('editview', id=entry.id) }}"></a>
     {% endif %}
   </article>
-  {% else %}
-  <div class="entry">
-    <p><em>No entries here so far.</em></p>
-  </div>
   {% endfor %}
 {% endblock %}
