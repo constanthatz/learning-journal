@@ -141,6 +141,16 @@ def test_listing(app, entry):
         assert expected in actual
 
 
+def test_detail_listing(app, entry, req_context):
+    item = run_query(req_context.db, READ_ENTRY)
+    print(item)
+    response = app.get('/detail/{}'.format(item[0][0]))
+    assert response.status_code == 200
+    actual = response.body
+    for expected in entry[:2]:
+        assert expected in actual
+
+
 def test_read_entries_empty(req_context):
     # call the function under test
     from journal import read_entries
