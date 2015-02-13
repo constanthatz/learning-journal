@@ -143,7 +143,6 @@ def test_listing(app, entry):
 
 def test_detail_listing(app, entry, req_context):
     item = run_query(req_context.db, READ_ENTRY)
-    print(item)
     response = app.get('/detail/{}'.format(item[0][0]))
     assert response.status_code == 200
     actual = response.body
@@ -189,13 +188,13 @@ def test_read_entry(req_context):
     result = read_entry(req_context)
     # make assertions about the result
 
-    assert 'entries' in result
-    assert len(result['entries']) == 4
+    assert 'entry' in result
+    assert len(result['entry']) == 4
 
-    assert expected[0] == result['entries']['title']
-    assert '<p>{}</p>'.format(expected[1]) == result['entries']['text']
+    assert expected[0] == result['entry']['title']
+    assert '<p>{}</p>'.format(expected[1]) == result['entry']['text']
     for key in 'id', 'created':
-        assert key in result['entries']
+        assert key in result['entry']
 
 
 def test_write_entry(req_context):
