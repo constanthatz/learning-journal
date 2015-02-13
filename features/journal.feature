@@ -1,13 +1,12 @@
-Feature: Post Detail View
-    Add a permalink to view that shows a single post
+Feature: Editing
+
+
 
     Scenario: Find detail view at consistent url
         Given that I want to see detail for post 1
         When I enter the url /detail/1
         Then I see the detail view for post 1
 
-
-Feature: Editing
 
     Scenario: Edit view
         Given a post
@@ -20,15 +19,11 @@ Feature: Editing
         Then the post is permanently edited in the database
 
 
-Feature: Markdown
-
     Scenario: Add Markdown to a post
         Given that I want to add markdown to a post
         When I add markdown syntax to a post and submit
         Then markdown in the post will be rendered as properly
 
-
-Feature: Code Highlighting
     Scenario: Add code blocks to a post
         Given that I want to add code blocks with highlighting to a post
         When I use backticks to denote a code block
