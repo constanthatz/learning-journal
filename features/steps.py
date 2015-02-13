@@ -26,15 +26,15 @@ world.READ_ENTRY = """SELECT * FROM entries
 settings = {'db': TEST_DSN}
 
 
-# @world.absorb
-# def run_query(db, query, params=(), get_results=True):
-#     cursor = db.cursor()
-#     cursor.execute(query, params)
-#     db.commit()
-#     results = None
-#     if get_results:
-#         results = cursor.fetchall()
-#     return results
+@world.absorb
+def run_query(db, query, params=(), get_results=True):
+    cursor = db.cursor()
+    cursor.execute(query, params)
+    db.commit()
+    results = None
+    if get_results:
+        results = cursor.fetchall()
+    return results
 
 
 @before.all
@@ -71,7 +71,6 @@ def clear_entries(scenario):
 @world.absorb
 def entry(app):
     """provide a single entry in the database"""
-    settings = db
     now = datetime.datetime.utcnow()
     expected = ('Test Title', 'Test Text', now)
     with closing(connect_db(settings)) as db:
@@ -131,19 +130,18 @@ def test_detail_listing(step, id):
 
 
     # item = run_query(req_context.db, world.READ_ENTRY)
-    world.entry(world.app)
-    response = world.app.get('/detail/1')
-    assert response.status_code == 200
+    world.entry = world.entry(world.app)
+    world.response = world.app.get('/detail/{}'.format(id))
+   
 
-    # world.response_body = response.body
-    # world.entry = entry[:2]
-    # for expected in entry[:2]:
-    #     assert expected in actual
+@step('Then I see the content of that post')
+def compare(step):
+    assert world.response.status_code == 200
 
 
-@step('I see the detail view with response code (\d+)')
-def compare(step, expected):
-    assert expected == world.status_code
+    actual = world.response.body
+    for expected in world.entry[:2]:
+        assert expected in actual
 
 
 
