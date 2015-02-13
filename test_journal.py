@@ -179,12 +179,12 @@ def test_read_entry(req_context):
     # make assertions about the result
 
     assert 'entries' in result
-    assert len(result['entries']) == 1
-    for entry in result['entries']:
-        assert expected[0] == entry['title']
-        assert '<p>{}</p>'.format(expected[1]) == entry['text']
-        for key in 'id', 'created':
-            assert key in entry
+    assert len(result['entries']) == 4
+
+    assert expected[0] == result['entries']['title']
+    assert '<p>{}</p>'.format(expected[1]) == result['entries']['text']
+    for key in 'id', 'created':
+        assert key in result['entries']
 
 
 def test_write_entry(req_context):
