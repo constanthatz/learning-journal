@@ -165,9 +165,10 @@ def read_entry(request):
     keys = ('id', 'title', 'text', 'created')
     row = cursor.fetchone()
     entry = dict(zip(keys, row))
+
     entry['text'] = markdown.markdown(
         entry['text'], extensions=['codehilite', 'fenced_code'])
-    return {'entries': entry}
+    return {'entry': entry}
 
 
 @view_config(route_name='editview', renderer='templates/edit.jinja2')
