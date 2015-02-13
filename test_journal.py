@@ -8,6 +8,7 @@ import datetime
 from journal import INSERT_ENTRY
 import os
 from cryptacular.bcrypt import BCRYPTPasswordManager
+from webtest import AppError
 
 
 TEST_DSN = 'dbname=test_learning_journal user=chatzis'
@@ -258,38 +259,42 @@ def test_post_to_add_view_unauthorized(app):
         'title': 'Hello there',
         'text': 'This is a post',
     }
-    response = app.post('/add', params=entry_data, status='3*')
-    redirected = response.follow()
-    actual = redirected.body
-    for expected in entry_data.values():
-            assert expected not in actual
+
+    with pytest.raises(AppError):
+        app.post('/add', params=entry_data, status='3*')
 
 
-def test_post_to_edit_view(app):
+def test_post_to_edit_view(app, entry, req_context):
     entry_data = {
         'title': 'Hello there',
         'text': 'This is a post',
     }
     username, password = ('admin', 'secret')
     login_helper(username, password, app)
-    response = app.post('/add', params=entry_data, status='3*')
+
+    item = run_query(req_context.db, READ_ENTRY)
+
+    response = app.post('/editview/{}'.format(item[0][0]), params=entry_data, status='3*')
     redirected = response.follow()
     actual = redirected.body
     for expected in entry_data.values():
         assert expected in actual
 
 
-def test_post_to_edit_view_unauthorized(app):
+def test_post_to_edit_view_unauthorized(app, entry, req_context):
     entry_data = {
         'title': 'Hello there',
         'text': 'This is a post',
     }
-    response = app.post('/add', params=entry_data, status='3*')
-    redirected = response.follow()
-    actual = redirected.body
-    for expected in entry_data.values():
-            assert expected not in actual
 
+    username, password = ('admin', 'wrong')
+    login_helper(username, password, app)
+
+    item = run_query(req_context.db, READ_ENTRY)
+
+    with pytest.raises(AppError):
+        app.post('/editview/{}'.format(item[0][0]), params=entry_data, status='3*')
+        
 
 def test_do_login_success(auth_req):
     from journal import do_login
