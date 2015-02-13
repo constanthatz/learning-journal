@@ -163,11 +163,11 @@ def read_entry(request):
     cursor = request.db.cursor()
     cursor.execute(DB_ENTRY, (request.matchdict['id'], ))
     keys = ('id', 'title', 'text', 'created')
-    entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
-    for item in entries:
-        item['text'] = markdown.markdown(
-            item['text'], extensions=['codehilite', 'fenced_code'])
-    return {'entries': entries}
+    row = cursor.fetchone()
+    entry = dict(zip(keys, row))
+    entry['text'] = markdown.markdown(
+        entry['text'], extensions=['codehilite', 'fenced_code'])
+    return {'entries': entry}
 
 
 @view_config(route_name='editview', renderer='templates/edit.jinja2')
