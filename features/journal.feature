@@ -2,9 +2,9 @@ Feature: Post Detail View
     Add a permalink to view that shows a single post
 
     Scenario: Find detail view at consistent url
-        Given a post id
-        When I enter the url /detail/id
-        Then I see the detail view for the post with the given id
+        Given that I want to see detail for post 1
+        When I enter the url /detail/1
+        Then I see the detail view for post 1
 
 
 Feature: Editing

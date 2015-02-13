@@ -1,6 +1,5 @@
 {% extends "base.jinja2" %}
 {% block body %}
-  {% for entry in entries%}
   <article class="entry" id="entry={{entry.id}}">
     {% if request.authenticated_userid %}
       <h3><a href= "{{ request.route_url('editview', id=entry.id) }}">{{ entry.title }}</a></h3>
@@ -15,5 +14,4 @@
       <a href= "{{ request.route_url('editview', id=entry.id) }}"></a>
     {% endif %}
   </article>
-  {% endfor %}
 {% endblock %}
