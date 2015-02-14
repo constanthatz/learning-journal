@@ -138,18 +138,31 @@ def edit_compare(step):
         assert world.entry_data[expected] in actual
 
 
-@step ("that I want to add markdown to a post")
+@step("that I use markdown syntax in my post")
 def markdown(step):
-    pass
-
-@step ("When I add markdown syntax to a post and submit")
-def add_post_with_markdown(step):
     world.markdown_post = world.add_entry(world.app, 'Test Markdown Title', '#Test Text\n##Test H2\n*list item\n*list item 2')
 
-@step("Then markdown in the post will be rendered as properly")
+
+@step("When I view the markdown post")
+def add_post_with_markdown(step):
+    world.markdown_response = world.app.get('/detail/{}'.format(1))
+
+
+@step("Then markdown in the post will be rendered properly")
 def test_markdown_renders(step):
-    # markdown_id = world.run_query(db, RETRIEVE_BY_TITLE, world.markdown_post., False)
-    response = world.app.get('/detail/{}'.format(1))
+    assert "<h1>Test Text</h1>" in world.markdown_response.body
 
-    assert "<h1>Test Text</h1>" in response.body
 
+@step("that I use backticks to denote a code block in my post")
+def add_post_with_backticks(step):
+    world.markdown_colorized_post = world.add_entry(world.app, 'Test Color Syntax Title', "```pyton\n   print test\n```")
+
+
+@step("When I view the color post")
+def get_color_post(step):
+    world.color_response = world.app.get('/detail/{}'.format(1))
+
+
+@step("Then the code in that block will be colorized")
+def check_color(step):
+    assert 'class="codehilite"' in world.color_response.body

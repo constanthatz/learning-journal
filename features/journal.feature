@@ -11,11 +11,11 @@ Feature: Editing
         Then I can see the new edit page and edit the entry
 
     Scenario: Add Markdown to a post
-        Given that I want to add markdown to a post
-        When I add markdown syntax to a post and submit
-        Then markdown in the post will be rendered as properly
+        Given that I use markdown syntax in my post
+        When I view the markdown post
+        Then markdown in the post will be rendered properly
 
     Scenario: Add code blocks to a post
-        Given that I want to add code blocks with highlighting to a post
-        When I use backticks to denote a code block
+        Given that I use backticks to denote a code block in my post
+        When I view the color post
         Then the code in that block will be colorized
