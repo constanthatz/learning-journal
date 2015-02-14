@@ -15,12 +15,14 @@ CREATE TABLE IF NOT EXISTS entries (
     created TIMESTAMP NOT NULL
 )
 """
-world.INSERT_ENTRY = """INSERT INTO entries (title, text, created) VALUES (%s, %s, %s)
+INSERT_ENTRY = """INSERT INTO entries (title, text, created) VALUES (%s, %s, %s)
 """
 
 TEST_DSN = 'dbname=test_learning_journal user=henryhowes'
-world.INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
-world.READ_ENTRY = """SELECT * FROM entries
+INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
+READ_ENTRY = """SELECT * FROM entries
+"""
+RETRIEVE_BY_TITLE = """SELECT * FROM entries WHERE title=%s
 """
 
 settings = {'db': TEST_DSN}
@@ -37,15 +39,15 @@ def run_query(db, query, params=(), get_results=True):
     return results
 
 
-@before.all
-def init_db():
+@before.each_scenario
+def init_db(scenario):
     with closing(connect_db(settings)) as db:
         db.cursor().execute(world.DB_SCHEMA)
         db.commit()
 
 
-@after.all
-def clear_db(total):
+@after.each_scenario
+def clear_db(scenario):
     with closing(connect_db(settings)) as db:
         db.cursor().execute("DROP TABLE entries")
         db.commit()
@@ -61,20 +63,13 @@ def app(scenario):
     world.app = TestApp(app)
 
 
-@after.each_scenario
-def clear_entries(scenario):
-    with closing(connect_db(settings)) as db:
-        db.cursor().execute("DELETE FROM entries")
-        db.commit()
-
-
 @world.absorb
-def entry(app):
+def add_entry(app, title, body):
     """provide a single entry in the database"""
     now = datetime.datetime.utcnow()
-    expected = ('Test Title', 'Test Text', now)
+    expected = (title, body, now)
     with closing(connect_db(settings)) as db:
-        world.run_query(db, world.INSERT_ENTRY, expected, False)
+        world.run_query(db, INSERT_ENTRY, expected, False)
         db.commit()
 
     return expected
@@ -130,7 +125,7 @@ def test_detail_listing(step, id):
 
 
     # item = run_query(req_context.db, world.READ_ENTRY)
-    world.entry = world.entry(world.app)
+    world.entry = world.add_entry(world.app, 'Test Title', 'Test Text')
     world.response = world.app.get('/detail/{}'.format(id))
    
 
@@ -144,13 +139,18 @@ def compare(step):
         assert expected in actual
 
 
+@step ("that I want to add markdown to a post")
+def markdown(step):
+    pass
 
-# @step("that I'm on the detail view for a post")
-# def on_detail_view(step, request):
-#     assert "detail" in request.url
+@step ("When I add markdown syntax to a post and submit")
+def add_post_with_markdown(step):
+    world.markdown_post = world.add_entry(world.app, 'Test Markdown Title', '#Test Text\n##Test H2\n*list item\n*list item 2')
 
-# @step("when I click a link from the detail view")
-# def link_exists(step, request):
+@step("Then markdown in the post will be rendered as properly")
+def test_markdown_renders(step):
+    # markdown_id = world.run_query(db, RETRIEVE_BY_TITLE, world.markdown_post., False)
+    response = world.app.get('/detail/{}'.format(1))
 
-
+    assert "<h1>Test Text</h1>" in response.body
 
