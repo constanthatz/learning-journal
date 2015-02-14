@@ -75,44 +75,16 @@ def add_entry(app, title, body):
     return expected
 
 
+@world.absorb
+def login_helper(username, password, app):
+    """encapsulate app login for reuse in tests
+
+    Accept all status codes so that we can make assertions in tests
+    """
+    login_data = {'username': username, 'password': password}
+    return app.post('/login', params=login_data, status='*')
 
 
-
-# @before.all
-# def db(request):
-#     """set up and tear down a database"""
-#     settings = {'db': world.TEST_DSN}
-#     world.init_db(settings)
-
-#     def cleanup():
-#         world.clear_db(settings)
-
-#     request.addfinalizer(cleanup)
-
-#     return settings
-
-
-
-    # def cleanup():
-    #     settings = {'db': world.TEST_DSN}
-    #     clear_entries()
-
-    #request.addfinalizer(cleanup)
-
-
-
-# @before.each_scenario
-# def req_context(db, request):
-#     """mock a request with a database attached"""
-#     settings = db
-#     req = testing.DummyRequest()
-#     with closing(connect_db(settings)) as db:
-#         req.db = db
-#         req.exception = None
-#         yield req
-
-#         # after a test has run, we clear out entries for isolation
-#         clear_entries()
 
 
 @step('that I want to see detail for post (\d+)')
@@ -123,20 +95,47 @@ def the_post(step, id):
 @step('when I enter the url /detail/(\d+)')
 def test_detail_listing(step, id):
 
-
-    # item = run_query(req_context.db, world.READ_ENTRY)
     world.entry = world.add_entry(world.app, 'Test Title', 'Test Text')
     world.response = world.app.get('/detail/{}'.format(id))
-   
 
-@step('Then I see the content of that post')
-def compare(step):
+
+@step('Then I see the detail page and the content of that post')
+def detial_compare(step):
     assert world.response.status_code == 200
-
 
     actual = world.response.body
     for expected in world.entry[:2]:
         assert expected in actual
+
+
+@step('that I want to edit post (\d+)')
+def the_edit(step, id):
+    world.number = int(id)
+
+
+@step('when I enter the url /editview/(\d+)')
+def test_edit_listing(step, id):
+    world.entry = world.add_entry(world.app, "Test Title", "Test Text")
+    world.entry_data = {
+        'title': 'Hello there',
+        'text': 'This is a post',
+    }
+
+    username, password = ('admin', 'secret')
+    login_helper(username, password, world.app)
+
+    world.response_post = world.app.post(
+        '/editview/{}'.format(id), params=world.entry_data, status='3*')
+    world.response_get = world.app.get('/detail/{}'.format(id))
+
+
+@step('Then I can see the new edit page and edit the entry')
+def edit_compare(step):
+    assert world.response_get.status_code == 200
+    world.entry_data
+    actual = world.response_get.body
+    for expected in world.entry_data:
+        assert world.entry_data[expected] in actual
 
 
 @step ("that I want to add markdown to a post")

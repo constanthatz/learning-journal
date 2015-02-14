@@ -1,16 +1,14 @@
 Feature: Editing
 
-
-
     Scenario: Find detail view at consistent url
         Given that I want to see detail for post 1
         When I enter the url /detail/1
-        Then I see the content of that post
+        Then I see the detail page and the content of that post
 
-    Scenario: Edit a post
-        Given that I want to edit a post
-        When I alter a post in the edit view and click save
-        Then the post is permanently edited in the database
+    Scenario: Edit view
+        Given that I want to edit post 1
+        When I enter the url /editview/1
+        Then I can see the new edit page and edit the entry
 
     Scenario: Add Markdown to a post
         Given that I want to add markdown to a post
