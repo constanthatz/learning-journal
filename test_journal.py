@@ -9,7 +9,8 @@ from journal import INSERT_ENTRY
 import os
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from webtest import AppError
-
+import unittest
+import markdown
 
 TEST_DSN = 'dbname=test_learning_journal user=chatzis'
 INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
@@ -373,3 +374,26 @@ def test_logout(app):
     assert response.status_code == 200
     actual = response.body
     assert INPUT_BTN not in actual
+
+
+class TestCodeHilite(unittest.TestCase):
+
+
+    def test_exists(self):
+        self.pygexists = True
+        try:
+            import pygments
+        except ImportError:
+            self.pygexists = False
+
+
+    def test_codehilite(self):
+
+        text = '\t# This should look like a comment'
+        md = markdown.Markdown(extentions=['codehilite', 'fenced_code'])
+        self.assertTrue(md.convert(text).startswith('<div class="codehilite"><pre>'))
+        # else:
+        #     self.assertEqual(
+        #         md.convert(text),
+        #         '<pre class="codehilite"><code># This should look like a comment''</code></pre>'
+        #     )

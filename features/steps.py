@@ -1,6 +1,11 @@
 from lettuce import *
 from journal import *
 import datetime
+import os
+from contextlib import closing
+
+from journal import connect_db
+
 
 world.DB_SCHEMA = """
 CREATE TABLE IF NOT EXISTS entries (
@@ -10,17 +15,22 @@ CREATE TABLE IF NOT EXISTS entries (
     created TIMESTAMP NOT NULL
 )
 """
-world.INSERT_ENTRY = """INSERT INTO entries (title, text, created) VALUES (%s, %s, %s)
+INSERT_ENTRY = """INSERT INTO entries (title, text, created) VALUES (%s, %s, %s)
 """
 
-world.TEST_DSN = 'dbname=test_learning_journal user=chatzis'
-world.INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
-world.READ_ENTRY = """SELECT * FROM entries
+TEST_DSN = 'dbname=test_learning_journal user=chatzis'
+INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
+READ_ENTRY = """SELECT * FROM entries
 """
+RETRIEVE_BY_TITLE = """SELECT * FROM entries WHERE title=%s
+"""
+
+settings = {'db': TEST_DSN}
 
 
 @world.absorb
 def run_query(db, query, params=(), get_results=True):
+    '''Run database SQL query.'''
     cursor = db.cursor()
     cursor.execute(query, params)
     db.commit()
@@ -30,105 +40,146 @@ def run_query(db, query, params=(), get_results=True):
     return results
 
 
-@world.absorb
-def clear_entries(settings):
-    with closing(connect_db(settings)) as db:
-        db.cursor().execute("DELETE FROM entries")
-        db.commit()
-
-
-@world.absorb
-def clear_db(settings):
-    with closing(connect_db(settings)) as db:
-        db.cursor().execute("DROP TABLE entries")
-        db.commit()
-
-
-@world.absorb
-def init_db(settings):
+@before.each_scenario
+def init_db(scenario):
+    '''Initialize a test database for the tests.'''
     with closing(connect_db(settings)) as db:
         db.cursor().execute(world.DB_SCHEMA)
         db.commit()
 
 
-@before.all
-def db(request):
-    """set up and tear down a database"""
-    settings = {'db': world.TEST_DSN}
-    world.init_db(settings)
-
-    def cleanup():
-        world.clear_db(settings)
-
-    request.addfinalizer(cleanup)
-
-    return settings
-
-
-@before.each_scenario
-def app(db, request):
-    from journal import main
-    from webtest import TestApp
-    os.environ['DATABASE_URL'] = world.TEST_DSN
-    app = main()
-
-    def cleanup():
-        settings = {'db': world.TEST_DSN}
-        clear_entries(settings)
-
-    request.addfinalizer(cleanup)
-
-    return TestApp(app)
-
-
-@before.each_scenario
-def entry(db, request):
-    """provide a single entry in the database"""
-    settings = db
-    now = datetime.datetime.utcnow()
-    expected = ('Test Title', 'Test Text', now)
+@after.each_scenario
+def clear_db(scenario):
+    ''' Clear the test database. '''
     with closing(connect_db(settings)) as db:
-        world.run_query(db, world.INSERT_ENTRY, expected, False)
+        db.cursor().execute("DROP TABLE entries")
         db.commit()
 
-    def cleanup():
-        world.clear_entries(settings)
 
-    request.addfinalizer(cleanup)
+@before.each_scenario
+def app(scenario):
+    ''' Start the web app for the tests. '''
+    from journal import main
+    from webtest import TestApp
+    os.environ['DATABASE_URL'] = TEST_DSN
+    app = main()
+
+    world.app = TestApp(app)
+
+
+@world.absorb
+def add_entry(app, title, body):
+    ''' Provide a single entry in the database. '''
+    now = datetime.datetime.utcnow()
+    expected = (title, body, now)
+    with closing(connect_db(settings)) as db:
+        world.run_query(db, INSERT_ENTRY, expected, False)
+        db.commit()
 
     return expected
 
 
-@before.each_scenario
-def req_context(db, request):
-    """mock a request with a database attached"""
-    settings = db
-    req = testing.DummyRequest()
-    with closing(connect_db(settings)) as db:
-        req.db = db
-        req.exception = None
-        yield req
-
-        # after a test has run, we clear out entries for isolation
-        clear_entries(settings)
+@world.absorb
+def login_helper(username, password, app):
+    '''Encapsulate app login for reuse in tests.
+    Accept all status codes so that we can make assertions in tests
+    '''
+    login_data = {'username': username, 'password': password}
+    return app.post('/login', params=login_data, status='*')
 
 
 @step('that I want to see detail for post (\d+)')
 def the_post(step, id):
+    ''' Get the post id. '''
     world.number = int(id)
 
 
-@step('when I enter the url /detail/1')
-def test_detail_listing(app, entry, req_context):
-    item = run_query(req_context.db, world.READ_ENTRY)
-    response = app.get('/detail/{}'.format(item[0][0]))
-    world.status_code = response.status_code
-    world.response_body = response.body
-    world.entry = entry[:2]
-    for expected in entry[:2]:
+@step('when I enter the url /detail/(\d+)')
+def test_detail_listing(step, id):
+    ''' Get the entry values. '''
+    # Add a entyr into the database for testing.
+    world.entry = world.add_entry(world.app, 'Test Title', 'Test Text')
+    world.response = world.app.get('/detail/{}'.format(id))
+
+
+@step('Then I see the detail page and the content of that post')
+def detial_compare(step):
+    ''' Check if we can see the detail page if it contains the data. '''
+    assert world.response.status_code == 200
+
+    actual = world.response.body
+    for expected in world.entry[:2]:
         assert expected in actual
 
 
-@step('I see the detail view with response code (\d+)')
-def compare(step, expected):
-    assert expected == world.status_code
+@step('that I want to edit post (\d+)')
+def the_edit(step, id):
+    ''' Get the post id. '''
+    world.number = int(id)
+
+
+@step('when I enter the url /editview/(\d+)')
+def test_edit_listing(step, id):
+    ''' Get the entry values. '''
+    # Add a entry into the database to edit for testing.
+    world.entry = world.add_entry(world.app, "Test Title", "Test Text")
+    world.entry_data = {
+        'title': 'Hello there',
+        'text': 'This is a post',
+    }
+
+    username, password = ('admin', 'secret')
+    login_helper(username, password, world.app)
+
+    world.response_post = world.app.post(
+        '/editview/{}'.format(id), params=world.entry_data, status='3*')
+    world.response_get = world.app.get('/detail/{}'.format(id))
+
+
+@step('Then I can see the new edit page and edit the entry')
+def edit_compare(step):
+    ''' Check if we can see the edit page if it contains the new data. '''
+    assert world.response_get.status_code == 200
+    world.entry_data
+    actual = world.response_get.body
+    for expected in world.entry_data:
+        assert world.entry_data[expected] in actual
+
+
+@step("that I use markdown syntax in my post")
+def markdown(step):
+    ''' Add an entry with markdown to the database for testing. '''
+    world.markdown_post = world.add_entry(
+        world.app,
+        'Test Markdown Title', '#Test Text\n##Test H2\n*list item\n*list item 2')
+
+
+@step("When I view the markdown post")
+def add_post_with_markdown(step):
+    ''' Get the the body of the detail page. '''
+    world.markdown_response = world.app.get('/detail/{}'.format(1))
+
+
+@step("Then markdown in the post will be rendered properly")
+def test_markdown_renders(step):
+    ''' Check for the html that indicates the markdown was rendered. '''
+    assert "<h1>Test Text</h1>" in world.markdown_response.body
+
+
+@step("that I use backticks to denote a code block in my post")
+def add_post_with_backticks(step):
+    ''' Add an entry with a code block to the database for testing. '''
+    world.markdown_colorized_post = world.add_entry(
+        world.app, 'Test Color Syntax Title', "```pyton\n   print test\n```")
+
+
+@step("When I view the color post")
+def get_color_post(step):
+    ''' Get the the body of the detail page. '''
+    world.color_response = world.app.get('/detail/{}'.format(1))
+
+
+@step("Then the code in that block will be colorized")
+def check_color(step):
+    ''' Check for the html that indicates the code block was rendered. '''
+    assert 'class="codehilite"' in world.color_response.body
