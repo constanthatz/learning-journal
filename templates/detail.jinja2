@@ -1,5 +1,5 @@
 {% extends "base.jinja2" %}
-<title>Python Learning Journal</title>
+{% block title %}{{entry.title}}{% endblock %}
 {% block body %}
   <article class="entry" id="entry={{entry.id}}">
     {% if request.authenticated_userid %}
