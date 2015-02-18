@@ -210,6 +210,8 @@ def add_entry(request):
             keys = ('id', 'title', 'text', 'created')
             row = cursor.fetchone()
             entry = dict(zip(keys, row))
+            entry['text'] = markdown.markdown(
+                entry['text'], extensions=['codehilite', 'fenced_code'])
             entry['created'] = entry['created'].strftime('%b %d, %Y')
             return entry
     else:

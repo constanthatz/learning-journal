@@ -1,4 +1,3 @@
-
 $('.add_entry').on('submit', function(event){
     event.preventDefault();
     add_post();
@@ -22,7 +21,7 @@ function success(entry){
     var template = '<article class="entry" id="entry{{id}}">'+
                       '<h3><a href= "/detail/{{id}}"><h3>{{title}}</a></h3>'+
                       '<p class="dateline">{{created}}'+
-                      '<div class="entry_body">{{text}}</div>'+
+                      '<div class="entry_body">{{{text}}}</div>'+
                     '</article>';
 
     var html = Mustache.to_html(template, entry);

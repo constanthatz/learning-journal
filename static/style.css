@@ -136,9 +136,10 @@ nav {
 }
 
 /* logo text */
-h1, h2 {
+header h1, h2 {
   color: #fff
 }
+
 
 /* links */
 a {
