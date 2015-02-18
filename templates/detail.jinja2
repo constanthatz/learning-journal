@@ -1,7 +1,7 @@
 {% extends "base.jinja2" %}
 {% block title %}{{entry.title}}{% endblock %}
 {% block body %}
-  <article class="entry" id="entry={{entry.id}}">
+  <article class="entry" id="entry{{entry.id}}">
     <h3>{{ entry.title }}</h3>
     <p class="dateline">{{ entry.created.strftime('%b. %d, %Y') }}
     <div class="entry_body">
@@ -11,6 +11,12 @@
       <h3><a id="editLink" href= "{{ request.route_url('editview', id=entry.id) }}">Edit</a></h3>
     {% endif %}
     <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+    <script>
+    $('#editLink').on("click", function(event){
+      event.preventDefault();
+      open_edit();
+    });
+    </script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
   </article>
 {% endblock %}

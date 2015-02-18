@@ -3,10 +3,10 @@ $('.add_entry').on('submit', function(event){
     add_post();
   });
 
-$('#editLink').click(function(event){
-  event.preventDefault();
-  open_edit();
-});
+// $('#editLink').on("click", function(event){
+//   event.preventDefault();
+//   open_edit();
+// });
 
 
 
@@ -23,7 +23,7 @@ function add_post() {
 }
 
 function open_edit() {
-    var id = $('.entry').id.split("entry")[1]
+    var id = $('.entry').id.split("entry")[1];
     $.ajax({
       url: '/editview',
       type: 'GET',
