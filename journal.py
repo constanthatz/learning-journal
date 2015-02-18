@@ -214,12 +214,9 @@ def add_entry(request):
             row = cursor.fetchone()
             entry = dict(zip(keys, row))
 
-            entry['created'] = entry['created'].strftime('%b %d, %Y')
+            # entry['created'] = entry['created'].strftime('%b %d, %Y')
             template = env.get_template('entry.jinja2')
-            return template.render(title=entry['title'],
-                                   text=entry['text'],
-                                   created=entry['created'],
-                                   id=entry['id'])
+            return template.render({'entry': entry})
     else:
         return HTTPForbidden()
     # return 'OK'

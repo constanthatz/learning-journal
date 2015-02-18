@@ -1,5 +1,11 @@
+
+$('.add_entry').on('submit', function(event){
+    event.preventDefault();
+    add_post();
+  });
+
+
 function add_post() {
-    console.log("test add post");
     var title = $('#title').val();
     var text = $('#text').val();
     $.ajax({
