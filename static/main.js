@@ -18,5 +18,6 @@ function add_post() {
 }
 
 function success(response){
-    $(".add_entry").after(response);
+    $('.add_entry').trigger('reset');
+    $('.add_entry').after(response);
 }
