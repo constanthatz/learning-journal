@@ -16,9 +16,6 @@
     </div>
   </form>
   </aside>
-  <script src="static/main.js"></script>
-
-  
   {% endif %}
   {% for entry in entries %}
   <article class="entry" id="entry{{entry.id}}">
@@ -33,4 +30,8 @@
     <p><em>No entries here so far</em></p>
   </div>
   {% endfor %}
+
+  <script src="static/main.js"></script>
+  <script src="static/jquery-1.11.2.js" type="text/javascript"></script>
+  <script src="static/mustache.min.js"></script>
 {% endblock %}

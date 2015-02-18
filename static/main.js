@@ -11,13 +11,20 @@ function add_post() {
     $.ajax({
       url: '/add',
       type: 'POST',
-      dataType: 'html',
+      dataType: 'json',
       data: {'title': title, 'text': text},
       success: success
     });
 }
 
-function success(response){
+function success(entry){
     $('.add_entry').trigger('reset')
-    $('.add_entry').after(response);
+    var template = '<article class="entry" id="entry{{id}}">'+
+                      '<h3><a href= "/detail/{{id}}"><h3>{{title}}</a></h3>'+
+                      '<p class="dateline">{{created}}'+
+                      '<div class="entry_body">{{text}}</div>'+
+                    '</article>';
+
+    var html = Mustache.to_html(template, entry)
+    $('.add_entry').after(html);
 }

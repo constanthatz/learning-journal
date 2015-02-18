@@ -17,7 +17,7 @@ from cryptacular.bcrypt import BCRYPTPasswordManager
 from pyramid.security import remember, forget
 import markdown
 from jinja2 import Environment, PackageLoader
-env = Environment(loader=PackageLoader('journal', 'templates'))
+# env = Environment(loader=PackageLoader('journal', 'templates'))
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -198,7 +198,7 @@ def editview_entry(request):
     return {'entries': entries}
 
 
-@view_config(route_name='add', renderer="string")
+@view_config(route_name='add', renderer="json")
 def add_entry(request):
     if request.authenticated_userid:
         if request.method == 'POST':
@@ -213,14 +213,10 @@ def add_entry(request):
             keys = ('id', 'title', 'text', 'created')
             row = cursor.fetchone()
             entry = dict(zip(keys, row))
-
-            # entry['created'] = entry['created'].strftime('%b %d, %Y')
-            template = env.get_template('entry.jinja2')
-            return template.render({'entry': entry})
+            entry['created'] = entry['created'].strftime('%b %d, %Y')
+            return entry
     else:
         return HTTPForbidden()
-    # return 'OK'
-    # return HTTPFound(request.route_url('home'))
 
 
 def do_login(request):
