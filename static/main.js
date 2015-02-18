@@ -1,12 +1,14 @@
-$('.add_entry').on('submit', function(event){
-    event.preventDefault();
-    add_post();
-  });
+$(document).ready(function () {
+  $('.add_entry').on('submit', function(event){
+      event.preventDefault();
+      add_post();
+    });
+  $('#editLink').on("click", function(event){
+      event.preventDefault();
+      open_edit();
+    });
+})
 
-// $('#editLink').on("click", function(event){
-//   event.preventDefault();
-//   open_edit();
-// });
 
 
 
@@ -23,13 +25,14 @@ function add_post() {
 }
 
 function open_edit() {
-    var id = $('.entry').id.split("entry")[1];
+    var id = $('.entry').attr('id').split("entry")[1];
     $.ajax({
       url: '/editview',
       type: 'GET',
       dataType: 'json',
       data: {'id': id},
-      success: open_edit_success
+      success: open_edit_success,
+      error: open_edit_fail
     });
 }
 
@@ -47,6 +50,7 @@ function success(entry){
 
 
 function open_edit_success(entry){
+  console.log("success")
   var template = '<aside><form action="{{ request.route_url("editview", id=entry.id) }}" method="POST" class="edit_entry">'+
                  '<div class="field"><label for="title">Title</label>'+
                  '<input type="text" value="{{title}}" size="30" name="title" id="title"/></div>'+
@@ -60,6 +64,10 @@ function open_edit_success(entry){
 
 
 
+function open_edit_fail(entry){
+  console.log("fail");
+  console.log(entry);
+}
 
 
 

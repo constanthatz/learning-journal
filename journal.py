@@ -124,7 +124,7 @@ def main():
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     config.add_route('detail', '/detail/{id}')
-    config.add_route('editview', '/editview/{id}')
+    config.add_route('editview', '/editview')
     config.scan()
     app = config.make_wsgi_app()
     return app
@@ -176,10 +176,12 @@ def read_entry(request):
 @view_config(route_name='editview', renderer='json')
 def editview_entry(request):
     """return a list of all entries as dicts"""
+    # import pdb; pdb.set_trace()
     if request.authenticated_userid:
         if request.method == 'GET':
             cursor = request.db.cursor()
-            cursor.execute(DB_ENTRY, (request.matchdict['id'], ))
+            # print request
+            cursor.execute(DB_ENTRY, (request.params.get('id', None), ))
             keys = ('id', 'title', 'text', 'created')
             row = cursor.fetchone()
             entry = dict(zip(keys, row))

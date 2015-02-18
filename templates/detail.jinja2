@@ -8,15 +8,9 @@
       {{ entry.text|safe }}
     </div>
     {% if request.authenticated_userid %}
-      <h3><a id="editLink" href= "{{ request.route_url('editview', id=entry.id) }}">Edit</a></h3>
+      <h3><a id="editLink" href= "{{ request.route_url('editview') }}">Edit</a></h3>
     {% endif %}
     <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
-    <script>
-    $('#editLink').on("click", function(event){
-      event.preventDefault();
-      open_edit();
-    });
-    </script>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
   </article>
 {% endblock %}
