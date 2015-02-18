@@ -138,8 +138,6 @@ def edit_entry(request):
     title = request.params.get('title', None)
     text = request.params.get('text', None)
     id = request.matchdict['id']
-    # created = datetime.datetime.utcnow()
-    print(request.matchdict['id'])
     request.db.cursor().execute(UPDATE_ENTRY, [title, text, id])
 
 
@@ -150,7 +148,6 @@ def read_entries(request):
     cursor.execute(DB_ENTRIES_LIST)
     keys = ('id', 'title', 'text', 'created')
     entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
-    # import pdb; pdb.set_trace()
     for item in entries:
         item['text'] = markdown.markdown(
             item['text'], extensions=['codehilite', 'fenced_code'])
