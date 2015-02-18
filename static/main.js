@@ -1,10 +1,11 @@
 function add_post() {
-    console.log("test add post")
-    var title = $('input#title').val();
-    var text = $('textarea#text').val();
-    var data = {'title': title, 'text': text};
-    $.post("/add", data)
-        .done(function(){$.get("/home");
+    console.log("test add post");
+    var title = $('#title').val();
+    var text = $('#text').val();
+    $.ajax({
+      url: '/add',
+      type: 'POST',
+      dataType: 'json',
+      data: {'title': title, 'text': text},
     });
-      
 }
