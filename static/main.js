@@ -40,7 +40,7 @@ function edit_post() {
       url: '/editview',
       type: 'POST',
       dataType: 'json',
-      data: {'title': title, 'text': text, 'id':},
+      data: {'title': title, 'text': text, 'id': id},
       success: edit_success
     });
 }
@@ -65,7 +65,8 @@ function edit_success(entry){
                     '</article>';
 
     var html = Mustache.to_html(template, entry);
-    $('#content').html(html);
+    $('#entryContent').html(html);
+    $('#editTwitter').toggle();
 }
 
 function open_edit_success(entry){
@@ -77,7 +78,8 @@ function open_edit_success(entry){
                  '<div class="control_row"><input type="submit" value="Share" name="Share"/></div></form></aside>';
 
   var html = Mustache.to_html(template, entry);
-  $('#content').html(html);
+  $('#editTwitter').toggle();
+  $('#entryContent').html(html);
   $('.edit_entry').on('submit', function(event){
       event.preventDefault();
       edit_post();

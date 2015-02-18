@@ -199,7 +199,7 @@ def editview_entry(request):
             cursor = request.db.cursor()
             cursor.execute(DB_ENTRY, (request.params.get('id', None), ))
             keys = ('id', 'title', 'text', 'created')
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             row = cursor.fetchone()
             print row
             entry = dict(zip(keys, row))
