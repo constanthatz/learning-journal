@@ -5,7 +5,12 @@ function add_post() {
     $.ajax({
       url: '/add',
       type: 'POST',
-      dataType: 'json',
+      dataType: 'html',
       data: {'title': title, 'text': text},
+      success: success
     });
+}
+
+function success(response){
+    $(".add_entry").after(response)
 }

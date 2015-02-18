@@ -16,6 +16,8 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from pyramid.security import remember, forget
 import markdown
+from jinja2 import Environment, PackageLoader
+env = Environment(loader=PackageLoader('journal', 'templates'))
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -94,7 +96,7 @@ def main():
     settings['reload_all'] = os.environ.get('DEBUG', True)
     settings['debug_all'] = os.environ.get('DEBUG', True)
     settings['db'] = os.environ.get(
-        'DATABASE_URL', 'dbname=learning_journal user=chatzis'
+        'DATABASE_URL', 'dbname=learning_journal user=henryhowes'
     )
     settings['auth.username'] = os.environ.get('AUTH_USERNAME', 'admin')
     manager = BCRYPTPasswordManager()
@@ -196,7 +198,7 @@ def editview_entry(request):
     return {'entries': entries}
 
 
-@view_config(route_name='add', renderer='json')
+@view_config(route_name='add', renderer="string")
 def add_entry(request):
     if request.authenticated_userid:
         if request.method == 'POST':
@@ -213,11 +215,14 @@ def add_entry(request):
             entry = dict(zip(keys, row))
 
             entry['created'] = entry['created'].strftime('%b %d, %Y')
-            print(entry)
-            return {'entry': entry}
+            template = env.get_template('entry.jinja2')
+            return template.render(title=entry['title'],
+                                   text=entry['text'],
+                                   created=entry['created'],
+                                   id=entry['id'])
     else:
         return HTTPForbidden()
-    return 'OK'
+    # return 'OK'
     # return HTTPFound(request.route_url('home'))
 
 
