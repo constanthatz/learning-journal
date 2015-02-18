@@ -13,8 +13,9 @@ This project is a learning journal application for the Code Fellows' Winter 2015
 
 
 ## Collaborators 
-Constantine Hatzis 
-Henry Howes 
+Constantine Hatzis, 
+Henry Howes, 
+Alicija Bulota
 
 ### Resources
 [Pyramid](http://www.pylonsproject.org/)  
