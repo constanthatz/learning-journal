@@ -55,7 +55,7 @@ def init_db():
     """
     settings = {}
     settings['db'] = os.environ.get(
-        'DATABASE_URL', 'dbname=learning_journal user=chatzis'
+        'DATABASE_URL', 'dbname=learning_journal user=henryhowes'
     )
     with closing(connect_db(settings)) as db:
         db.cursor().execute(DB_SCHEMA)
@@ -91,7 +91,7 @@ def main():
     settings['reload_all'] = os.environ.get('DEBUG', True)
     settings['debug_all'] = os.environ.get('DEBUG', True)
     settings['db'] = os.environ.get(
-        'DATABASE_URL', 'dbname=learning_journal user=chatzis'
+        'DATABASE_URL', 'dbname=learning_journal user=henryhowes'
     )
     settings['auth.username'] = os.environ.get('AUTH_USERNAME', 'admin')
     manager = BCRYPTPasswordManager()
@@ -196,6 +196,7 @@ def editview_entry(request):
 @view_config(route_name='add', request_method='POST')
 def add_entry(request):
     if request.authenticated_userid:
+        print request.params
         try:
             write_entry(request)
         except psycopg2.Error:
@@ -204,7 +205,8 @@ def add_entry(request):
     else:
         return HTTPForbidden()
 
-    return HTTPFound(request.route_url('home'))
+    return {"": ""}
+    # return HTTPFound(request.route_url('home'))
 
 
 def do_login(request):

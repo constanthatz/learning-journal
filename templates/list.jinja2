@@ -16,13 +16,14 @@
     </div>
   </form>
   </aside>
+  <script src="static/main.js"></script>
   <script>
   $('.add_entry').on('submit', function(event){
     event.preventDefault();
     add_post();
   });
   </script>
-  <script src="static/main.js"></script>
+  
   {% endif %}
   {% for entry in entries %}
   <article class="entry" id="entry={{entry.id}}">
