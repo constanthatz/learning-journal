@@ -9,8 +9,6 @@ from journal import INSERT_ENTRY
 import os
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from webtest import AppError
-import unittest
-import markdown
 
 TEST_DSN = 'dbname=test_learning_journal user=chatzis'
 INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
