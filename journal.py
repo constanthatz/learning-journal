@@ -200,7 +200,6 @@ def editview_entry(request):
             keys = ('id', 'title', 'text', 'created')
             # import pdb; pdb.set_trace()
             row = cursor.fetchone()
-            print row
             entry = dict(zip(keys, row))
 
             entry['text'] = markdown.markdown(
