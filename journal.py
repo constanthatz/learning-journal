@@ -143,7 +143,6 @@ def edit_entry(request):
     title = request.params.get('title', None)
     text = request.params.get('text', None)
     id = request.params.get('id', None)
-    print id
     request.db.cursor().execute(UPDATE_ENTRY, [title, text, id])
 
 
