@@ -96,7 +96,7 @@ def main():
     settings['reload_all'] = os.environ.get('DEBUG', True)
     settings['debug_all'] = os.environ.get('DEBUG', True)
     settings['db'] = os.environ.get(
-        'DATABASE_URL', 'dbname=learning_journal user=henryhowes'
+        'DATABASE_URL', 'dbname=learning_journal user=chatzis'
     )
     settings['auth.username'] = os.environ.get('AUTH_USERNAME', 'admin')
     manager = BCRYPTPasswordManager()
@@ -200,7 +200,6 @@ def editview_entry(request):
             keys = ('id', 'title', 'text', 'created')
             # import pdb; pdb.set_trace()
             row = cursor.fetchone()
-            print row
             entry = dict(zip(keys, row))
 
             entry['text'] = markdown.markdown(
