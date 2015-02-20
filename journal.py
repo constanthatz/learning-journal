@@ -16,24 +16,32 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from pyramid.security import remember, forget
 import markdown
+import sqlalchemy as sa
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import (
+    scoped_session,
+    sessionmaker,
+    )
+from zope.sqlalchemy import ZopeTransactionExtension
+
 
 here = os.path.dirname(os.path.abspath(__file__))
 
-DB_SCHEMA = """
-CREATE TABLE IF NOT EXISTS entries (
-    id serial PRIMARY KEY,
-    title VARCHAR (127) NOT NULL,
-    text TEXT NOT NULL,
-    created TIMESTAMP NOT NULL
-)
-"""
+# DB_SCHEMA = """
 
-INSERT_ENTRY = """INSERT INTO entries (title, text, created)
-VALUES (%s, %s, %s)
-"""
-DB_ENTRIES_LIST = """SELECT id, title, text, created FROM entries
-ORDER BY created DESC
-"""
+# CREATE TABLE IF NOT EXISTS entries (
+#     id serial PRIMARY KEY,
+#     title VARCHAR (127) NOT NULL,
+#     text TEXT NOT NULL,
+#     created TIMESTAMP NOT NULL
+# )
+# """
+# INSERT_ENTRY = """INSERT INTO entries (title, text, created)
+# VALUES (%s, %s, %s)
+# """
+# DB_ENTRIES_LIST = """SELECT id, title, text, created FROM entries
+# ORDER BY created DESC
+# """
 
 DB_ENTRY = """SELECT * FROM entries WHERE id=%s
 """
@@ -47,47 +55,95 @@ UPDATE_ENTRY = """UPDATE entries SET title=%s, text=%s WHERE id=%s
 logging.basicConfig()
 log = logging.getLogger(__file__)
 
+DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+Base = declarative_base()
+
+
+class Entry(Base):
+    __tablename__ = 'entries'
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    title = sa.Column(sa.Unicode(127), nullable=False)
+    text = sa.Column(sa.UnicodeText, nullable=False)
+    created = sa.Column(
+        sa.DateTime, nullable=False, default=datetime.datetime.utcnow
+    )
+
+    def __repr__(self):
+        return u"{}: {}".format(self.__class__.__name__, self.title)
+
+    @classmethod
+    def all(cls):
+        return DBSession.query(cls).order_by(cls.created.desc()).all()
+
+    @classmethod
+    def newest_entry(cls):
+        return DBSession.query(cls).order_by(cls.created.desc()).one()
+
+    @classmethod
+    def by_id(cls, id):
+        return DBSession.query(cls).filter(cls.id == id).one()
+
+    @classmethod
+    def from_request(cls, request):
+        title = request.params.get('title', None)
+        text = request.params.get('text', None)
+        created = datetime.datetime.utcnow()
+        new_entry = cls(title=title, text=text, created=created)
+        DBSession.add(new_entry)
+
+    def update_from_request(self, request):
+        self.title = request.params.get('title', None)
+        self.text = request.params.get('text', None)
+
+    def render_markdown(self):
+        return markdown.markdown(
+            self.text, extensions=['codehilite', 'fenced_code'])
+
+
+logging.basicConfig()
+log = logging.getLogger(__file__)
+
 
 def connect_db(settings):
     """Return a connection to the configured database"""
     return psycopg2.connect(settings['db'])
 
 
-def init_db():
-    """Create database dables defined by DB_SCHEMA
+# def init_db():
+#     """Create database dables defined by DB_SCHEMA
 
-    Warning: This function will not update existing table definitions
-    """
-    settings = {}
-    settings['db'] = os.environ.get(
-        'DATABASE_URL', 'dbname=learning_journal user=chatzis'
-    )
-    with closing(connect_db(settings)) as db:
-        db.cursor().execute(DB_SCHEMA)
-        db.commit()
-
-
-@subscriber(NewRequest)
-def open_connection(event):
-    request = event.request
-    settings = request.registry.settings
-    request.db = connect_db(settings)
-    request.add_finished_callback(close_connection)
+#     Warning: This function will not update existing table definitions
+#     """
+#     settings = {}
+#     settings['db'] = os.environ.get(
+#         'DATABASE_URL', 'dbname=learning_journal user=chatzis'
+#     )
+#     with closing(connect_db(settings)) as db:
+#         db.cursor().execute(DB_SCHEMA)
+#         db.commit()
 
 
-def close_connection(request):
-    """close the database connection for this request
+# @subscriber(NewRequest)
+# def open_connection(event):
+#     request = event.request
+#     settings = request.registry.settings
+#     request.db = connect_db(settings)
+#     request.add_finished_callback(close_connection)
 
-    If there has been an error in the processing of the request, abort any
-    open transactions.
-    """
-    db = getattr(request, 'db', None)
-    if db is not None:
-        if request.exception is not None:
-            db.rollback()
-        else:
-            db.commit()
-        request.db.close()
+
+# def close_connection(request):
+#     """close the database connection for this request
+
+#     If there has been an error in the processing of the request, abort any
+#     open transactions.
+#     """
+#     db = getattr(request, 'db', None)
+#     if db is not None:
+#         if request.exception is not None:
+#             db.rollback()
+#         else:
+#             db.commit()
+#         request.db.close()
 
 
 def main():
@@ -95,9 +151,19 @@ def main():
     settings = {}
     settings['reload_all'] = os.environ.get('DEBUG', True)
     settings['debug_all'] = os.environ.get('DEBUG', True)
-    settings['db'] = os.environ.get(
-        'DATABASE_URL', 'dbname=learning_journal user=chatzis'
+    # settings['db'] = os.environ.get(
+    #     'DATABASE_URL', 'dbname=learning_journal user=chatzis'
+    # )
+
+    user = 'chatzis'
+    settings['sqlalchemy.url'] = os.environ.get(
+        # FIX THE DB URL FORMAT, MUST BE rfc1738 URL
+        'DATABASE_URL',
+        'postgresql://{}:@localhost:5432/learning_journal'.format(user)
     )
+    engine = sa.engine_from_config(settings, 'sqlalchemy.')
+    DBSession.configure(bind=engine)
+
     settings['auth.username'] = os.environ.get('AUTH_USERNAME', 'admin')
     manager = BCRYPTPasswordManager()
     settings['auth.password'] = os.environ.get(
@@ -128,109 +194,6 @@ def main():
     config.scan()
     app = config.make_wsgi_app()
     return app
-
-
-def write_entry(request):
-    """write a single entry to the database"""
-    title = request.params.get('title', None)
-    text = request.params.get('text', None)
-    created = datetime.datetime.utcnow()
-    request.db.cursor().execute(INSERT_ENTRY, [title, text, created])
-
-
-def edit_entry(request):
-    """write a single entry to the database"""
-    title = request.params.get('title', None)
-    text = request.params.get('text', None)
-    id = request.params.get('id', None)
-    request.db.cursor().execute(UPDATE_ENTRY, [title, text, id])
-
-
-@view_config(route_name='home', renderer='templates/list.jinja2')
-def read_entries(request):
-    """return a list of all entries as dicts"""
-    cursor = request.db.cursor()
-    cursor.execute(DB_ENTRIES_LIST)
-    keys = ('id', 'title', 'text', 'created')
-    entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
-    for item in entries:
-        item['text'] = markdown.markdown(
-            item['text'], extensions=['codehilite', 'fenced_code'])
-    return {'entries': entries}
-
-
-@view_config(route_name='detail', renderer='templates/detail.jinja2')
-def read_entry(request):
-    """return a list of one entry as a dict"""
-    cursor = request.db.cursor()
-    cursor.execute(DB_ENTRY, (request.matchdict['id'], ))
-    keys = ('id', 'title', 'text', 'created')
-    row = cursor.fetchone()
-    entry = dict(zip(keys, row))
-
-    entry['text'] = markdown.markdown(
-        entry['text'], extensions=['codehilite', 'fenced_code'])
-    return {'entry': entry}
-
-
-@view_config(route_name='editview', renderer='json')
-def editview_entry(request):
-    """return a list of all entries as dicts"""
-    # import pdb; pdb.set_trace()
-    if request.authenticated_userid:
-        if request.method == 'GET':
-            cursor = request.db.cursor()
-            cursor.execute(DB_ENTRY, (request.params.get('id', None), ))
-            keys = ('id', 'title', 'text', 'created')
-            row = cursor.fetchone()
-            entry = dict(zip(keys, row))
-            entry['created'] = entry['created'].strftime('%b %d, %Y')
-
-            return entry
-
-        elif request.method == 'POST':
-            try:
-                edit_entry(request)
-            except psycopg2.Error:
-                # this will catch any errors generated by the database
-                return HTTPInternalServerError()
-
-            cursor = request.db.cursor()
-            cursor.execute(DB_ENTRY, (request.params.get('id', None), ))
-            keys = ('id', 'title', 'text', 'created')
-            # import pdb; pdb.set_trace()
-            row = cursor.fetchone()
-            entry = dict(zip(keys, row))
-
-            entry['text'] = markdown.markdown(
-                entry['text'], extensions=['codehilite', 'fenced_code'])
-            entry['created'] = entry['created'].strftime('%b %d, %Y')
-            return entry
-    else:
-        return HTTPForbidden()
-
-
-@view_config(route_name='add', renderer="json")
-def add_entry(request):
-    if request.authenticated_userid:
-        if request.method == 'POST':
-            try:
-                write_entry(request)
-            except psycopg2.Error:
-                # this will catch any errors generated by the database
-                return HTTPInternalServerError()
-
-            cursor = request.db.cursor()
-            cursor.execute(NEW_ENTRY)
-            keys = ('id', 'title', 'text', 'created')
-            row = cursor.fetchone()
-            entry = dict(zip(keys, row))
-            entry['text'] = markdown.markdown(
-                entry['text'], extensions=['codehilite', 'fenced_code'])
-            entry['created'] = entry['created'].strftime('%b %d, %Y')
-            return entry
-    else:
-        return HTTPForbidden()
 
 
 def do_login(request):
@@ -270,6 +233,120 @@ def login(request):
 def logout(request):
     headers = forget(request)
     return HTTPFound(request.route_url('home'), headers=headers)
+
+
+@view_config(route_name='detail', renderer='templates/detail.jinja2')
+def read_entry(request):
+    """return a list of one entry as a dict"""
+    # cursor = request.db.cursor()
+    # cursor.execute(DB_ENTRY, (request.matchdict['id'], ))
+    # keys = ('id', 'title', 'text', 'created')
+    # row = cursor.fetchone()
+    # entry = dict(zip(keys, row))
+
+    entry = Entry.by_id()
+
+    entry['text'] = markdown.markdown(
+        entry['text'], extensions=['codehilite', 'fenced_code'])
+    return {'entry': entry}
+
+
+@view_config(route_name='home', renderer='templates/list.jinja2')
+def read_entries(request):
+    """return a list of all entries as dicts"""
+    # cursor = request.db.cursor()
+    # cursor.execute(DB_ENTRIES_LIST)
+    # keys = ('id', 'title', 'text', 'created')
+    # entries = [dict(zip(keys, row)) for row in cursor.fetchall()]
+
+    entries = Entry.all()
+
+    for item in entries:
+        item['text'] = markdown.markdown(
+            item['text'], extensions=['codehilite', 'fenced_code'])
+    return {'entries': entries}
+
+
+# def write_entry(request):
+#     """write a single entry to the database"""
+#     title = request.params.get('title', None)
+#     text = request.params.get('text', None)
+#     created = datetime.datetime.utcnow()
+#     request.db.cursor().execute(INSERT_ENTRY, [title, text, created])
+
+
+@view_config(route_name='add', renderer="json")
+def add_entry(request):
+    if request.authenticated_userid:
+        if request.method == 'POST':
+            try:
+                Entry.from_request(request)
+                # write_entry(request)
+            except psycopg2.Error:
+                # this will catch any errors generated by the database
+                return HTTPInternalServerError()
+
+            # cursor = request.db.cursor()
+            # cursor.execute(NEW_ENTRY)
+            # keys = ('id', 'title', 'text', 'created')
+            # row = cursor.fetchone()
+            # entry = dict(zip(keys, row))
+
+            entry = Entry.newest_entry()
+
+            entry['text'] = markdown.markdown(
+                entry['text'], extensions=['codehilite', 'fenced_code'])
+            entry['created'] = entry['created'].strftime('%b %d, %Y')
+            return entry
+    else:
+        return HTTPForbidden()
+
+
+# def edit_entry(request):
+#     """write a single entry to the database"""
+#     title = request.params.get('title', None)
+#     text = request.params.get('text', None)
+#     id = request.params.get('id', None)
+#     request.db.cursor().execute(UPDATE_ENTRY, [title, text, id])
+
+
+@view_config(route_name='editview', renderer='json')
+def editview_entry(request):
+    """return a list of all entries as dicts"""
+    # import pdb; pdb.set_trace()
+    if request.authenticated_userid:
+        entry = Entry.by_id()
+
+        if request.method == 'GET':
+            # cursor = request.db.cursor()
+            # cursor.execute(DB_ENTRY, (request.params.get('id', None), ))
+            # keys = ('id', 'title', 'text', 'created')
+            # row = cursor.fetchone()
+            # entry = dict(zip(keys, row))
+            # entry['created'] = entry['created'].strftime('%b %d, %Y')
+            return entry
+
+        elif request.method == 'POST':
+            try:
+                entry.update_from_request()
+            except psycopg2.Error:
+                # this will catch any errors generated by the database
+                return HTTPInternalServerError()
+
+            # cursor = request.db.cursor()
+            # cursor.execute(DB_ENTRY, (request.params.get('id', None), ))
+            # keys = ('id', 'title', 'text', 'created')
+            # # import pdb; pdb.set_trace()
+            # row = cursor.fetchone()
+            # entry = dict(zip(keys, row))
+
+            # entry['text'] = markdown.markdown(
+            #     entry['text'], extensions=['codehilite', 'fenced_code'])
+
+            entry['created'] = entry['created'].strftime('%b %d, %Y')
+            return entry
+    else:
+        return HTTPForbidden()
 
 if __name__ == '__main__':
     app = main()
