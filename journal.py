@@ -79,7 +79,10 @@ class Entry(Base):
         return self.created.strftime('%b %d, %Y')
 
     def json(self):
-        return {'title': self.title, 'text': self.text}
+        return {'title': self.title,
+                'text': self.text,
+                'created': self.created.strftime('%b %d, %Y'),
+                'id': self.id}
 
 
 logging.basicConfig()
@@ -169,7 +172,7 @@ def logout(request):
 @view_config(route_name='detail', renderer='templates/detail.jinja2')
 def read_entry(request):
     """return a list of one entry as a dict"""
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
 
     entry = Entry.by_id(request.matchdict['id'])
     return {'entry': entry}
@@ -200,7 +203,7 @@ def add_entry(request):
 @view_config(route_name='editview', renderer='json')
 def editview_entry(request):
     """return a list of all entries as dicts"""
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     if request.authenticated_userid:
         entry = Entry.by_id(request.params.get('id', None))
         if request.method == 'GET':
