@@ -5,9 +5,6 @@ $(document).ready(function () {
     });
 });
 
-
-
-
 function add_post() {
     var title = $('#title').val();
     var text = $('#text').val();
@@ -59,7 +56,7 @@ function success(entry){
 
 function edit_success(entry){
     var template = '<article class="entry" id="entry{{id}}">'+
-                      '<h3><a href= "/detail/{{id}}"><h3>{{title}}</a></h3>'+
+                      '<h3>{{title}}</h3>'+
                       '<p class="dateline">{{created}}'+
                       '<div class="entry_body">{{{text}}}</div>'+
                     '</article>';
@@ -67,6 +64,7 @@ function edit_success(entry){
     var html = Mustache.to_html(template, entry);
     $('#entryContent').html(html);
     $('#editTwitter').toggle();
+    twttr.widgets.load();
 }
 
 function open_edit_success(entry){
