@@ -84,6 +84,12 @@ class Entry(Base):
                 'created': self.created.strftime('%b %d, %Y'),
                 'id': self.id}
 
+    def json_edit_get(self):
+        return {'title': self.title,
+                'text': self.text,
+                'created': self.created.strftime('%b %d, %Y'),
+                'id': self.id}
+
 
 logging.basicConfig()
 log = logging.getLogger(__file__)
@@ -98,7 +104,7 @@ def main():
         'DATABASE_URL',
         'postgresql://{}:@localhost:5432/learning_journal'.format(USER)
     )
-    engine = sa.engine_from_config(settings, 'sqlalchemy.')
+    engine = sa.engine_from_config(settings, 'sqlalchemy.', echo=True)
     DBSession.configure(bind=engine)
 
     settings['auth.username'] = os.environ.get('AUTH_USERNAME', 'admin')
@@ -207,7 +213,7 @@ def editview_entry(request):
     if request.authenticated_userid:
         entry = Entry.by_id(request.params.get('id', None))
         if request.method == 'GET':
-            return entry.json()
+            return entry.json_edit_get()
 
         elif request.method == 'POST':
             try:
