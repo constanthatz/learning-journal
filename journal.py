@@ -80,7 +80,7 @@ class Entry(Base):
 
     def json(self):
         return {'title': self.title,
-                'text': self.text,
+                'text': self.render_markdown(),
                 'created': self.created.strftime('%b %d, %Y'),
                 'id': self.id}
 
