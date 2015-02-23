@@ -104,7 +104,7 @@ def main():
         'DATABASE_URL',
         'postgresql://{}:@localhost:5432/learning_journal'.format(USER)
     )
-    engine = sa.engine_from_config(settings, 'sqlalchemy.', echo=True)
+    engine = sa.engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
 
     settings['auth.username'] = os.environ.get('AUTH_USERNAME', 'admin')
@@ -127,6 +127,7 @@ def main():
         authorization_policy=ACLAuthorizationPolicy(),
     )
     config.include('pyramid_jinja2')
+    config.include('pyramid_tm')
     config.add_static_view('static', os.path.join(here, 'static'))
     config.add_route('home', '/')
     config.add_route('add', '/add')
