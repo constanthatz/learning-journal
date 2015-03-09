@@ -91,6 +91,11 @@ class Entry(Base):
                 'id': self.id}
 
 
+def connect_db(settings):
+    """Return a connection to the configured database"""
+    return psycopg2.connect(settings['db'])
+
+
 def main():
     """Create a configured wsgi app"""
     settings = {}
