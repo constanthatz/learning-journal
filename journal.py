@@ -91,10 +91,6 @@ class Entry(Base):
                 'id': self.id}
 
 
-logging.basicConfig()
-log = logging.getLogger(__file__)
-
-
 def main():
     """Create a configured wsgi app"""
     settings = {}
